@@ -93,7 +93,7 @@ describe("Brick", () => {
 
     grid = new Grid()
     v0 = grid.setVoxel({x: 0, y: 0, z: 0})
-    let v1 = grid.setVoxel({x: 0, y: 0, z: 1})
+    grid.setVoxel({x: 0, y: 0, z: 1})
 
     grid.initializeBricks()
 
@@ -101,8 +101,8 @@ describe("Brick", () => {
     expect(connectedBricks.size).to.equal(1)
 
     grid = new Grid()
-    v0 = grid.setVoxel({x: 0, y: 0, z: 0})
-    v1 = grid.setVoxel({x: 0, y: 0, z: 1})
+    grid.setVoxel({x: 0, y: 0, z: 0})
+    const v1 = grid.setVoxel({x: 0, y: 0, z: 1})
     grid.setVoxel({x: 0, y: 0, z: 2})
 
     grid.initializeBricks()

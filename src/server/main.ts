@@ -62,12 +62,6 @@ else {
   log.info("production mode activated")
 }
 
-const testMode = webapp.get("env") === "test"
-
-loggingLevel = developmentMode ? "debug" : "warn"
-if (testMode) {
-  loggingLevel = "error"
-}
 
 
 export async function setupRouting (port: number | string): Promise<void> {

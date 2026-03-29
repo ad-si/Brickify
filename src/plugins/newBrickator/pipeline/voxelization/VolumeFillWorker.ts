@@ -53,7 +53,6 @@ const VolumeFillWorker: VolumeFillWorkerType = {
       voxelPlane = grid[x as unknown as number]
       const xNum = parseInt(x)
       for (y in voxelPlane) {
-        voxelColumn = voxelPlane[y as unknown as number]
         const yNum = parseInt(y)
         this._postProgress(callback, xNum, yNum, numVoxelsX, numVoxelsY)
         this._fillUp(grid, xNum, yNum, numVoxelsZ)

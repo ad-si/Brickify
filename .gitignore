@@ -27,3 +27,4 @@
 !/public/js/workers/
 node_modules
 npm-debug.log
+.direnv
