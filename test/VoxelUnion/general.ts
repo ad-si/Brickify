@@ -247,7 +247,7 @@ describe("VoxelUnion", () => {
     return expect(data.zLayers[-1][1][1].voxel).to.equal(false)
   })
 
-  return it('should create a filled "+" plate point list', () => {
+  it('should create a filled "+" plate point list', () => {
     //  #
     // ###
     //  #

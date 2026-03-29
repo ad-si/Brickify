@@ -18,7 +18,7 @@ describe("id generator tests", () => {
     return expect(id).to.have.length(5)
   })
 
-  return it("should abort if the filter does not accept any id", () => {
+  it("should abort if the filter does not accept any id", () => {
     const rejectingFilter = () => false
     const id = idGenerator.generate(rejectingFilter, 3)
     return expect(id).to.be.null

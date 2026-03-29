@@ -20,7 +20,7 @@ import * as urlSessions from "./urlSessions.js"
 
 const __dirname = import.meta.dirname
 
-let loggingLevel = "warn"
+const loggingLevel = "warn"
 
 // Make logger available to other modules.
 // Must be instantiated before requiring bundled modules

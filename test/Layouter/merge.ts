@@ -90,7 +90,7 @@ describe("brickLayouter merge", () => {
     return expect((v0.brick as Brick).getSize()).to.eql({x: 1, y: 2, z: 1})
   })
 
-  return it("should merge four bricks", () => {
+  it("should merge four bricks", () => {
     const grid = new Grid()
     const v0 = grid.setVoxel({x: 5, y: 5, z: 0})
     grid.setVoxel({x: 5, y: 6, z: 0})

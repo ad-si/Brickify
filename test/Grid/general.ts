@@ -132,7 +132,7 @@ describe("Grid", () => {
     return expect(bricks.size).to.equal(numVoxels)
   })
 
-  return it("should return correct number of bricks for a 1x1x1 configuration", () => {
+  it("should return correct number of bricks for a 1x1x1 configuration", () => {
     const testGrid = new Grid()
     testGrid.setVoxel({x: 0, y: 0, z: 0})
 

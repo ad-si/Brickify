@@ -5,7 +5,7 @@ import LayoutOptimizer from "../../src/plugins/newBrickator/pipeline/Layout/Layo
 import Grid from "../../src/plugins/newBrickator/pipeline/Grid.js"
 import type Brick from "../../src/plugins/newBrickator/pipeline/Brick.js"
 
-describe("brickLayouter split", () => it("should split one brick and relayout locally", () => {
+describe("brickLayouter split", () => { it("should split one brick and relayout locally", () => {
   const plateLayouter = new PlateLayouter(true)
   const layoutOptimizer = new LayoutOptimizer(null, plateLayouter, true)
   const grid = new Grid()
@@ -32,4 +32,4 @@ describe("brickLayouter split", () => it("should split one brick and relayout lo
   // expect to be more than 1 brick
   const bricks = grid.getAllBricks()
   return expect(bricks.size > 1).to.equal(true)
-}))
+}) })

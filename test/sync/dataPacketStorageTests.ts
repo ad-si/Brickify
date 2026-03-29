@@ -13,7 +13,7 @@ const Response = () => new MockResponse() as unknown as ExpressResponse & MockRe
 describe("server-side dataPacket-storage tests", () => {
   afterEach(() => dataPackets.clear())
 
-  describe("dataPacket creation", () => it("should create empty packets", () => {
+  describe("dataPacket creation", () => { it("should create empty packets", () => {
     const response = Response()
     dataPackets.create(Request(), response)
     return response.whenSent.then(() => {
@@ -22,7 +22,7 @@ describe("server-side dataPacket-storage tests", () => {
       expect(response).to.have.nested.property("content.id")
       return expect(response).to.have.nested.property("content.data").to.be.empty
     })
-  }))
+  }) })
 
   describe("dataPacket existence checks", () => {
     it("should reject invalid id exists checks", () => {

@@ -317,7 +317,7 @@ describe("Brick", () => {
     return expect(b.isValid()).to.equal(false)
   })
 
-  return it("should report whether it is hole free", () => {
+  it("should report whether it is hole free", () => {
     let x: number; let y: number; let z: number
     let grid = new Grid()
     let voxels: Voxel[] = []
