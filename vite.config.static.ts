@@ -73,6 +73,7 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: '@', replacement: path.resolve(__dirname, 'src') },
+      { find: 'text-encoding', replacement: path.resolve(__dirname, 'src/shims/text-encoding.ts') },
       { find: 'path', replacement: 'path-browserify' },
       { find: 'stream', replacement: 'stream-browserify' },
       // Use localStorage-based proxy for static builds instead of server API
