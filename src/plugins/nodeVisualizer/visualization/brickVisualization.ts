@@ -459,10 +459,11 @@ export default class BrickVisualization {
 
   _highlightBigBrush (voxel: VoxelLike, material: MeshLambertMaterial): boolean {
     const size = this.voxelSelector.getBrushSize(true)
-    const dimensions = new THREE.Vector3(size.x, size.y, size.z)
-    if ((this.bigBrushHighlight == null) ||
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    !this.bigBrushHighlight.dimensions!.equals(dimensions)) {
+    const dims = this.bigBrushHighlight?.dimensions
+    if (dims == null ||
+    dims.x !== size.x ||
+    dims.y !== size.y ||
+    dims.z !== size.z) {
       if (this.bigBrushHighlight) {
         this.brickShadowThreeNode.remove(this.bigBrushHighlight)
       }
