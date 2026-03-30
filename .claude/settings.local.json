@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(cut:*)",
+      "Bash(do echo:*)",
+      "Bash(for f:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx tsc:*)",
+      "Bash(perl:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(python3:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": false
+}

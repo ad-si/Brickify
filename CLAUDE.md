@@ -1,0 +1,1 @@
+- All test and build targets are in the makefile
