@@ -474,10 +474,12 @@ export default class BrickVisualization {
       this.brickShadowThreeNode.add(this.bigBrushHighlight)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const highlight = this.bigBrushHighlight!
     const worldPosition = this.grid.mapVoxelToWorld(voxel.position)
-    this.bigBrushHighlight.position.copy(worldPosition as THREE.Vector3)
-    this.bigBrushHighlight.material = material
-    return this.bigBrushHighlight.visible = true
+    highlight.position.copy(worldPosition as THREE.Vector3)
+    highlight.material = material
+    return highlight.visible = true
   }
 
   unhighlightBigBrush (): boolean | undefined {
