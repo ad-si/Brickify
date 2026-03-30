@@ -55,7 +55,6 @@
     "jszip": "^3.10.1",
     "loglevel": "^1.9.2",
     "meshlib": "^0.7.3",
-    "mkdirp": "^3.0.1",
     "morgan": "^1.10.1",
     "mousetrap": "^1.6.5",
     "nanobar": "^0.4.2",

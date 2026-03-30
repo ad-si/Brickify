@@ -1,1 +1,2 @@
 - All test and build targets are in the makefile
+- Always run `make test` after any changes to ensure the tests pass

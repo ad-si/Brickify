@@ -1,6 +1,7 @@
 import type Winston from "winston"
+import { createRequire } from "module"
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+const require = createRequire(import.meta.url)
 const winston = require("winston") as {
   transports: { Console: new (opts: unknown) => unknown }
   format: {

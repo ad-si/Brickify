@@ -448,22 +448,6 @@ declare module 'jszip' {
   export default JSZip;
 }
 
-declare module 'mkdirp' {
-  function mkdirp(path: string, opts?: mkdirp.Options): Promise<string | undefined>;
-  namespace mkdirp {
-    interface Options {
-      mode?: number | string;
-      fs?: unknown;
-    }
-    function sync(path: string, opts?: Options): string | undefined;
-    function manual(path: string, opts?: Options): Promise<string | undefined>;
-    function manualSync(path: string, opts?: Options): string | undefined;
-    function native(path: string, opts?: Options): Promise<string | undefined>;
-    function nativeSync(path: string, opts?: Options): string | undefined;
-  }
-  export = mkdirp;
-}
-
 declare module 'stylus' {
   interface StylusRenderer {
     set(key: string, value: unknown): StylusRenderer;

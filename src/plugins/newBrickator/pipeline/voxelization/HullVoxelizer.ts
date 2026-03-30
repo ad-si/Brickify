@@ -15,7 +15,7 @@ export interface VoxelizeOptions {
 interface FaceVertexMesh {
   vertexCoordinates: number[]
   faceVertexIndices: number[]
-  faceNormalCoordinates: number[]
+  faceNormalCoordinates?: number[]
 }
 
 export interface Model {
@@ -177,7 +177,7 @@ export default class Voxelizer {
           voxelSpaceCoordinates[i + 2] = coordinate.z
         }
 
-        const normals = faceVertexMesh.faceNormalCoordinates
+        const normals = faceVertexMesh.faceNormalCoordinates ?? []
         const directions: number[] = []
         for (i = 2, end1 = normals.length; i < end1; i += 3) {
           const z = normals[i]

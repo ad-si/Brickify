@@ -2,16 +2,31 @@
 var VolumeFillWorker = {
 	lastProgress: -1,
 	fillGrid(grid, callback) {
+		if (!grid || grid.length === 0) {
+			callback({
+				state: "finished",
+				data: grid ?? []
+			});
+			return {
+				state: "finished",
+				data: grid ?? []
+			};
+		}
 		const numVoxelsX = grid.length - 1;
 		let numVoxelsY = 0;
 		let numVoxelsZ = 0;
 		for (const voxelPlane of grid) {
+			if (!voxelPlane) continue;
 			numVoxelsY = Math.max(numVoxelsY, voxelPlane.length - 1);
-			for (const voxelColumn of voxelPlane) numVoxelsZ = Math.max(numVoxelsZ, voxelColumn.length - 1);
+			for (const voxelColumn of voxelPlane) {
+				if (!voxelColumn) continue;
+				numVoxelsZ = Math.max(numVoxelsZ, voxelColumn.length - 1);
+			}
 		}
 		this._resetProgress();
 		for (let xNum = 0; xNum < grid.length; xNum++) {
 			const voxelPlane = grid[xNum];
+			if (!voxelPlane) continue;
 			for (let yNum = 0; yNum < voxelPlane.length; yNum++) {
 				this._postProgress(callback, xNum, yNum, numVoxelsX, numVoxelsY);
 				this._fillUp(grid, xNum, yNum, numVoxelsZ);
@@ -27,6 +42,7 @@ var VolumeFillWorker = {
 		};
 	},
 	_fillUp(grid, x, y, numVoxelsZ) {
+		if (!grid[x] || !grid[x][y]) return;
 		let insideModel = false;
 		let z = 0;
 		const currentFillVoxelQueue = [];
