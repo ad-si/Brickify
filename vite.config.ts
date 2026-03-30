@@ -44,6 +44,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      'text-encoding': path.resolve(__dirname, 'src/shims/text-encoding.ts'),
       path: 'path-browserify',
       stream: 'stream-browserify',
     },
