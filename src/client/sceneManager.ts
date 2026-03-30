@@ -1,4 +1,5 @@
 import Project from "../common/project/project.js"
+import type Scene from "../common/project/scene.js"
 import type Bundle from "./bundle.js"
 import type Node from "../common/project/node.js"
 
@@ -8,9 +9,10 @@ import type Node from "../common/project/node.js"
 export default class SceneManager {
   bundle: Bundle
   selectedNode: Node | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pluginHooks: any
-  project: Promise<any>
-  scene: Promise<any>
+  project: Promise<Project>
+  scene: Promise<Scene | undefined>
   bootboxOpen?: boolean
 
   constructor (bundle: Bundle) {
@@ -26,16 +28,17 @@ export default class SceneManager {
     this._deleteCurrentNode = this._deleteCurrentNode.bind(this)
     this.bundle = bundle
     this.selectedNode = null
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.pluginHooks = this.bundle.pluginHooks
-    this.project = (Project as any).load()
+    this.project = Project.load()
     this.scene = this.project.then(project => project.getScene())
   }
 
   init () {
     return this.scene
-      .then((scene: any) => scene.getNodes())
-      .then((nodes: any) => Array.from(nodes)
-        .map((node: any) => this._notify("onNodeAdd", node as Node)))
+      .then(scene => scene?.getNodes())
+      .then(nodes => (nodes ?? [])
+        .map((node: Node) => this._notify("onNodeAdd", node)))
   }
 
   getHotkeys () {
@@ -48,8 +51,11 @@ export default class SceneManager {
   }
 
   _notify (hook: string, node: Node) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     return Promise.all(this.pluginHooks[hook](node))
+      /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call */
       .then(() => __guardMethod__((this.bundle.ui as any)?.workflowUi, hook, (o, m) => o[m](node)))
+      /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call */
   }
 
   //
@@ -58,8 +64,8 @@ export default class SceneManager {
 
   add (node: Node) {
     return this.scene
-      .then((scene: any) => {
-        if (scene.nodes.length > 0) {
+      .then(scene => {
+        if (scene && scene.nodes.length > 0) {
           void this.remove(scene.nodes[0])
         }
         return this._addNodeToScene(node)
@@ -68,14 +74,14 @@ export default class SceneManager {
 
   _addNodeToScene (node: Node) {
     return this.scene
-      .then((scene: any) => scene.addNode(node))
+      .then(scene => scene?.addNode(node))
       .then(() => this._notify("onNodeAdd", node))
       .then(() => { this.select(node) })
   }
 
   remove (node: Node) {
     return this.scene
-      .then((scene: any) => scene.removeNode(node))
+      .then(scene => scene?.removeNode(node))
       .then(() => this._notify("onNodeRemove",  node))
       .then(() => {
         if (node === this.selectedNode) {
@@ -87,9 +93,9 @@ export default class SceneManager {
 
   clearScene () {
     return this.scene
-      .then((scene: any) => scene.getNodes())
-      .then((nodes: any) => Array.from(nodes)
-        .map((node: any) => this.remove(node as Node)))
+      .then(scene => scene?.getNodes())
+      .then(nodes => (nodes ?? [])
+        .map((node: Node) => this.remove(node)))
   }
 
   //
@@ -122,11 +128,12 @@ export default class SceneManager {
 
     this.bootboxOpen = true
     void this.selectedNode.getName()
-      .then((name: any) => {
-        const question = `Do you really want to delete ${name}?`
+      .then((name: unknown) => {
+        const question = `Do you really want to delete ${String(name)}?`
         return bootbox.confirm(question, result => {
           this.bootboxOpen = false
           if (result) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             void this.remove(this.selectedNode!)
             this.deselect()
           return
@@ -139,11 +146,13 @@ export default class SceneManager {
     return {
       hotkey: "del",
       description: "delete selected model",
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       callback: this._deleteCurrentNode,
     }
   }
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 function __guardMethod__ (obj: any, methodName: string, transform: (o: any, m: string) => any) {
   if (typeof obj !== "undefined" && obj !== null && typeof obj[methodName] === "function") {
     return transform(obj, methodName)
@@ -152,3 +161,4 @@ function __guardMethod__ (obj: any, methodName: string, transform: (o: any, m: s
     return undefined
   }
 }
+/* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */

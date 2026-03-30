@@ -30,12 +30,12 @@ export default class LoadUi {
 
   _initFileLoadHandler () {
     fileDropper.init((event: DragEvent) => {
-      this.fileLoadHandler(event)
+      void this.fileLoadHandler(event)
     })
 
     return $("#fileInput")
       .on("change", event => {
-        return this.fileLoadHandler(event as unknown as FileEvent)
+        void this.fileLoadHandler(event as unknown as FileEvent)
           .then(() => {
             $("#fileInput")
               .val("")
@@ -69,7 +69,7 @@ export default class LoadUi {
           loadButtonFeedback,
           spinnerOptions,
         )
-          .then((identifier: string | void): Promise<unknown> | undefined => {
+          .then((identifier: string | undefined): Promise<unknown> | undefined => {
             if (typeof identifier === "string") {
               return this.workflowUi.bundle.modelLoader.loadByIdentifier(identifier)
             }
@@ -83,7 +83,7 @@ export default class LoadUi {
 Loading the new model will replace the existing model!"
 
     return this.workflowUi.bundle.sceneManager.scene.then((scene) => {
-      if (scene.nodes.length === 0) {
+      if (scene == null || scene.nodes.length === 0) {
         return true
       }
       return new Promise(resolve => bootbox.confirm(question, resolve))

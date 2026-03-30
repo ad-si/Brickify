@@ -35,22 +35,22 @@ const dimension = 400
 export default class LegoBoard {
   disposableResource: DisposableResource
   bundle: Bundle | null = null
-  globalConfig: GlobalConfig | null = null
-  threejsNode: Object3D | null = null
+  globalConfig!: GlobalConfig
+  threejsNode!: Object3D
   fidelity: number = 0
   usePipeline: boolean = false
   isVisible: boolean = true
   isScreenshotMode: boolean = false
-  pipelineScene: Scene | null = null
-  baseplateBox: Mesh | null = null
-  studsContainer: Object3D | null = null
-  highFiStudsContainer: Object3D | null = null
-  baseplateMaterial: MeshLambertMaterial | null = null
-  baseplateTexturedMaterial: MeshLambertMaterial | null = null
-  baseplateTransparentMaterial: MeshLambertMaterial | null = null
-  studMaterial: MeshLambertMaterial | null = null
-  currentBaseplateMaterial: MeshLambertMaterial | null = null
-  pipelineSceneTarget: RenderTarget | null = null
+  pipelineScene!: Scene
+  baseplateBox!: Mesh
+  studsContainer!: Object3D
+  highFiStudsContainer!: Object3D
+  baseplateMaterial!: MeshLambertMaterial
+  baseplateTexturedMaterial!: MeshLambertMaterial
+  baseplateTransparentMaterial!: MeshLambertMaterial
+  studMaterial!: MeshLambertMaterial
+  currentBaseplateMaterial!: MeshLambertMaterial
+  pipelineSceneTarget!: RenderTarget
   renderTargetsInitialized: boolean | null = null
 
   // Store the global configuration for later use by init3d
@@ -73,7 +73,7 @@ export default class LegoBoard {
 
   init (bundle: Bundle) {
     this.bundle = bundle
-    this.globalConfig = this.bundle.globalConfig
+    this.globalConfig = bundle.globalConfig
   }
 
   // Load the board
@@ -88,28 +88,35 @@ export default class LegoBoard {
     this._initbaseplateBox()
     this._initStudGeometries()
 
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment */
     // create scene for pipeline
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.pipelineScene = (this.bundle!.renderer as any).getDefaultScene()
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment */
   }
 
   _initbaseplateBox () {
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
     // Create baseplate with 5 faces in each direction
     const box = this.disposableResource.track(new THREE.BoxGeometry(dimension, dimension, 8, 5, 5) as any)
     const bufferGeometry = this.disposableResource.track(new THREE.BufferGeometry() as any)
     bufferGeometry.fromGeometry(box)
-    this.baseplateBox = this.disposableResource.track(new THREE.Mesh(bufferGeometry, this.baseplateMaterial!) as any)
-    this.baseplateBox!.translateZ(-4)
-    return this.threejsNode!.add(this.baseplateBox!)
+    this.baseplateBox = this.disposableResource.track(new THREE.Mesh(bufferGeometry, this.baseplateMaterial) as any)
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
+    this.baseplateBox.translateZ(-4)
+    return this.threejsNode.add(this.baseplateBox)
   }
 
   _initStudGeometries () {
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment */
     this.studsContainer = this.disposableResource.track(this._generateStuds(7) as any)
-    this.studsContainer!.visible = false
-    this.threejsNode!.add(this.studsContainer!)
+    this.studsContainer.visible = false
+    this.threejsNode.add(this.studsContainer)
 
     this.highFiStudsContainer = this.disposableResource.track(this._generateStuds(42) as any)
-    this.highFiStudsContainer!.visible = false
-    return this.threejsNode!.add(this.highFiStudsContainer!)
+    this.highFiStudsContainer.visible = false
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment */
+    return this.threejsNode.add(this.highFiStudsContainer)
   }
 
   _generateStuds (radiusSegments: number): Object3D {
@@ -122,9 +129,9 @@ export default class LegoBoard {
     let end2: number
     let step2: number
     const studGeometry = new THREE.CylinderGeometry(
-      this.globalConfig!.studSize.radius,
-      this.globalConfig!.studSize.radius,
-      this.globalConfig!.studSize.height,
+      this.globalConfig.studSize.radius,
+      this.globalConfig.studSize.radius,
+      this.globalConfig.studSize.height,
       radiusSegments,
     )
     const rotation = new THREE.Matrix4()
@@ -132,12 +139,12 @@ export default class LegoBoard {
     studGeometry.applyMatrix(rotation)
 
     const translation = new THREE.Matrix4()
-    translation.makeTranslation(0, 0, this.globalConfig!.studSize.height / 2)
+    translation.makeTranslation(0, 0, this.globalConfig.studSize.height / 2)
     studGeometry.applyMatrix(translation)
 
     const studsGeometry = new THREE.Geometry()
-    const xSpacing = this.globalConfig!.gridSpacing.x
-    const ySpacing = this.globalConfig!.gridSpacing.y
+    const xSpacing = this.globalConfig.gridSpacing.x
+    const ySpacing = this.globalConfig.gridSpacing.y
     const studsGeometrySize = 80
     for (x = 0, end = studsGeometrySize, step = xSpacing, asc = step > 0; asc ? x < end : x > end; x += step) {
       let asc1: boolean
@@ -145,6 +152,7 @@ export default class LegoBoard {
       let step1: number
       for (y = 0, end1 = studsGeometrySize, step1 = ySpacing, asc1 = step1 > 0; asc1 ? y < end1 : y > end1; y += step1) {
         translation.makeTranslation(x, y, 0)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
         studsGeometry.merge(studGeometry as any, translation)
       }
     }
@@ -153,6 +161,7 @@ export default class LegoBoard {
     studGeometry.dispose()
 
     const bufferGeometry = new THREE.BufferGeometry()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     ;(bufferGeometry as any).fromGeometry(studsGeometry)
 
     // Dispose the original geometry after conversion
@@ -165,7 +174,7 @@ export default class LegoBoard {
       let step3: number
       for (y = (-dimension + ySpacing) / 2, end3 = dimension / 2, step3 = studsGeometrySize, asc3 = step3 > 0; asc3 ? y < end3 : y > end3; y += step3) {
         // Track the buffer geometry and mesh
-        const mesh = new THREE.Mesh(bufferGeometry, this.studMaterial!)
+        const mesh = new THREE.Mesh(bufferGeometry, this.studMaterial)
         mesh.translateX(x)
         mesh.translateY(y)
         container.add(mesh)
@@ -185,7 +194,7 @@ export default class LegoBoard {
     studTexture.repeat.set(dimension / 8, dimension / 8)
 
     this.baseplateMaterial = this.disposableResource.track(new THREE.MeshLambertMaterial({
-      color: this.globalConfig!.colors.basePlate,
+      color: this.globalConfig.colors.basePlate,
     }))
     this.baseplateTexturedMaterial = this.disposableResource.track(new THREE.MeshLambertMaterial({
       map: studTexture,
@@ -193,13 +202,13 @@ export default class LegoBoard {
     this.currentBaseplateMaterial = this.baseplateTexturedMaterial
 
     this.baseplateTransparentMaterial = this.disposableResource.track(new THREE.MeshLambertMaterial({
-      color: this.globalConfig!.colors.basePlate,
+      color: this.globalConfig.colors.basePlate,
       opacity: 0.4,
       transparent: true,
     }))
 
     return this.studMaterial = this.disposableResource.track(new THREE.MeshLambertMaterial({
-      color: this.globalConfig!.colors.basePlateStud,
+      color: this.globalConfig.colors.basePlateStud,
     }))
   }
 
@@ -215,14 +224,17 @@ export default class LegoBoard {
       return
     }
 
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment */
     const {
       camera,
     } = this.bundle.renderer as any
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment */
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (camera.position.z < 0) {
-      this.baseplateBox!.material = this.baseplateTransparentMaterial!
-      this.studsContainer!.visible = false
-      this.highFiStudsContainer!.visible = false
+      this.baseplateBox.material = this.baseplateTransparentMaterial
+      this.studsContainer.visible = false
+      this.highFiStudsContainer.visible = false
     }
     else {
       this._updateFidelitySettings()
@@ -238,8 +250,10 @@ export default class LegoBoard {
     // the screen size has changed
     if (!((this.renderTargetsInitialized != null) &&
     RenderTargetHelper.renderTargetHasRightSize(
-      this.pipelineSceneTarget!.renderTarget, threeRenderer,
+      this.pipelineSceneTarget.renderTarget, threeRenderer,
     ))) {
+      /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment */
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (this.pipelineSceneTarget != null) {
         RenderTargetHelper.deleteRenderTarget(this.pipelineSceneTarget as any, threeRenderer)
         this.disposableResource.untrack(this.pipelineSceneTarget as any)
@@ -248,12 +262,14 @@ export default class LegoBoard {
       this.pipelineSceneTarget = this.disposableResource.track(RenderTargetHelper.createRenderTarget(
         threeRenderer, null, null, 1.0,
       ) as any)
+      /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment */
       this.renderTargetsInitialized = true
     }
 
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
     // Render board
     ;(threeRenderer as any).render(
-      this.pipelineScene, camera, this.pipelineSceneTarget!.renderTarget, true,
+      this.pipelineScene, camera, this.pipelineSceneTarget.renderTarget, true,
     )
 
     const gl = (threeRenderer as any).context
@@ -261,13 +277,13 @@ export default class LegoBoard {
     // Render baseplate transparent if cam looks from below
     if (camera.position.z < 0) {
       // One fully transparent render pass
-      this.pipelineSceneTarget!.blendingMaterial.uniforms.opacity.value = 0.4
-      return (threeRenderer as any).render(this.pipelineSceneTarget!.quadScene, camera, target, false)
+      this.pipelineSceneTarget.blendingMaterial.uniforms.opacity.value = 0.4
+      return (threeRenderer as any).render(this.pipelineSceneTarget.quadScene, camera, target, false)
     }
     else {
       // One default opaque pass
-      this.pipelineSceneTarget!.blendingMaterial.uniforms.opacity.value = 1
-      ;(threeRenderer as any).render(this.pipelineSceneTarget!.quadScene, camera, target, false)
+      this.pipelineSceneTarget.blendingMaterial.uniforms.opacity.value = 1
+      ;(threeRenderer as any).render(this.pipelineSceneTarget.quadScene, camera, target, false)
 
       // Render one pass transparent, where visible object or shadow is
       // (= no lego)
@@ -276,25 +292,26 @@ export default class LegoBoard {
       gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP)
       gl.stencilMask(0x00)
 
-      this.pipelineSceneTarget!.blendingMaterial.uniforms.opacity.value = 0.4
+      this.pipelineSceneTarget.blendingMaterial.uniforms.opacity.value = 0.4
 
       gl.disable(gl.DEPTH_TEST)
-      ;(threeRenderer as any).render(this.pipelineSceneTarget!.quadScene, camera, target, false)
+      ;(threeRenderer as any).render(this.pipelineSceneTarget.quadScene, camera, target, false)
       gl.enable(gl.DEPTH_TEST)
 
       return gl.disable(gl.STENCIL_TEST)
     }
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
   }
 
   toggleVisibility () {
-    this.threejsNode!.visible = !this.threejsNode!.visible
+    this.threejsNode.visible = !this.threejsNode.visible
     return this.isVisible = !this.isVisible
   }
 
   setFidelity (fidelityLevel: number, availableLevels: string[], options: FidelityOptions): void {
     if (options.screenshotMode != null) {
       this.isScreenshotMode = options.screenshotMode
-      this.threejsNode!.visible = this.isVisible && !this.isScreenshotMode
+      this.threejsNode.visible = this.isVisible && !this.isScreenshotMode
     }
 
     // Determine whether to show or hide studs
@@ -317,10 +334,10 @@ export default class LegoBoard {
         this.usePipeline = true
 
         // move lego board and studs from threeNode to pipeline scene
-        this._moveThreeObjects(this.threejsNode!, this.pipelineScene!, [
-          this.baseplateBox!,
-          this.studsContainer!,
-          this.highFiStudsContainer!,
+        this._moveThreeObjects(this.threejsNode, this.pipelineScene, [
+          this.baseplateBox,
+          this.studsContainer,
+          this.highFiStudsContainer,
         ])
         return
       }
@@ -330,10 +347,10 @@ export default class LegoBoard {
         this.usePipeline = false
 
         // move lego board and studs from pipeline to threeNode
-        this._moveThreeObjects(this.pipelineScene!, this.threejsNode!, [
-          this.baseplateBox!,
-          this.studsContainer!,
-          this.highFiStudsContainer!,
+        this._moveThreeObjects(this.pipelineScene, this.threejsNode, [
+          this.baseplateBox,
+          this.studsContainer,
+          this.highFiStudsContainer,
         ])
         return
       }
@@ -353,21 +370,22 @@ export default class LegoBoard {
 
   _updateFidelitySettings () {
     // show studs?
-    this.studsContainer!.visible = this.fidelity === 1
-    this.highFiStudsContainer!.visible = this.fidelity === 2
+    this.studsContainer.visible = this.fidelity === 1
+    this.highFiStudsContainer.visible = this.fidelity === 2
 
     // remove texture because we have physical studs?
     if (this.fidelity === 0) {
-      this.baseplateBox!.material =  this.baseplateTexturedMaterial!
+      this.baseplateBox.material =  this.baseplateTexturedMaterial
     }
     else {
-      this.baseplateBox!.material = this.baseplateMaterial!
+      this.baseplateBox.material = this.baseplateMaterial
     }
-    return this.currentBaseplateMaterial = this.baseplateBox!.material as MeshLambertMaterial
+    return this.currentBaseplateMaterial = this.baseplateBox.material as MeshLambertMaterial
   }
 
   dispose() {
-    if (this.disposableResource && !this.disposableResource.isDisposed()) {
+    if (!this.disposableResource.isDisposed()) {
+      /* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
       // Clean up render targets
       if (this.pipelineSceneTarget) {
         RenderTargetHelper.deleteRenderTarget(this.pipelineSceneTarget as any, (this.bundle?.renderer as any)?.threeRenderer)
@@ -385,25 +403,29 @@ export default class LegoBoard {
         if (this.studsContainer) this.pipelineScene.remove(this.studsContainer)
         if (this.highFiStudsContainer) this.pipelineScene.remove(this.highFiStudsContainer)
       }
+      /* eslint-enable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
 
       // Dispose all tracked resources
       this.disposableResource.dispose()
-      ;(this as any).disposableResource = null
 
+      /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
       // Clear references
-      this.bundle = null
-      this.globalConfig = null
-      this.threejsNode = null
-      this.pipelineScene = null
-      this.baseplateBox = null
-      this.studsContainer = null
-      this.highFiStudsContainer = null
-      this.pipelineSceneTarget = null
-      this.baseplateMaterial = null
-      this.baseplateTexturedMaterial = null
-      this.baseplateTransparentMaterial = null
-      this.studMaterial = null
-      this.currentBaseplateMaterial = null
+      const self = this as any
+      self.disposableResource = null
+      self.bundle = null
+      self.globalConfig = null
+      self.threejsNode = null
+      self.pipelineScene = null
+      self.baseplateBox = null
+      self.studsContainer = null
+      self.highFiStudsContainer = null
+      self.pipelineSceneTarget = null
+      self.baseplateMaterial = null
+      self.baseplateTexturedMaterial = null
+      self.baseplateTransparentMaterial = null
+      self.studMaterial = null
+      self.currentBaseplateMaterial = null
+      /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
     }
   }
 }

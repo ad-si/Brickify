@@ -6,7 +6,7 @@ export const init = function (callback: (event: DragEvent) => void) {
   bindDropHandler(target, overlay, callback)
 }
 
-var addOverlay = function (target: HTMLElement) {
+const addOverlay = function (target: HTMLElement) {
   const overlay = document.createElement("div")
   overlay.className = "modal-backdrop"
   overlay.id = "dropoverlay"
@@ -20,7 +20,7 @@ var addOverlay = function (target: HTMLElement) {
   return overlay
 }
 
-var bindDropHandler = function (target: HTMLElement, overlay: HTMLDivElement, callback: (event: DragEvent) => void) {
+const bindDropHandler = function (target: HTMLElement, overlay: HTMLDivElement, callback: (event: DragEvent) => void) {
   target.addEventListener("drop", (event: DragEvent) => {
     hideOverlay(overlay)
     callback(event)
@@ -41,11 +41,11 @@ var bindDropHandler = function (target: HTMLElement, overlay: HTMLDivElement, ca
   })
 }
 
-var showOverlay = (overlay: HTMLDivElement) => overlay.style.opacity = "0.8"
+const showOverlay = (overlay: HTMLDivElement) => overlay.style.opacity = "0.8"
 
-var hideOverlay = (overlay: HTMLDivElement) => overlay.style.opacity = "0"
+const hideOverlay = (overlay: HTMLDivElement) => overlay.style.opacity = "0"
 
-var stopEvent = function (event: DragEvent) {
+const stopEvent = function (event: DragEvent) {
   event.preventDefault()
   event.stopPropagation()
 }

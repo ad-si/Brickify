@@ -44,6 +44,7 @@ export default class PointerDispatcher {
 
     const element = this.bundle.ui?.renderer.getDomElement() as HTMLElement | undefined
     if (!element) return
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     element.addEventListener("wheel", this.onMouseWheel)
 
     for (const event in pointerEnums.events) {
@@ -134,6 +135,7 @@ export default class PointerDispatcher {
     // this is needed because chrome (not firefox/IE) does not
     // handle multiple listeners correctly
     const target = event.target as HTMLElement | null
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     target?.removeEventListener("wheel", this.onMouseWheel)
 
     return false

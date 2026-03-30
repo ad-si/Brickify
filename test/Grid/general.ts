@@ -105,7 +105,7 @@ describe("Grid", () => {
     grid.setVoxel({x: 0, y: 0, z: 0})
     grid.setVoxel({x: 1, y: 0, z: 0})
 
-    grid.initializeBricks()
+    void grid.initializeBricks()
     const bricks = grid.getAllBricks()
 
     return expect(bricks.size).to.equal(2)
@@ -125,7 +125,7 @@ describe("Grid", () => {
       }
     }
 
-    grid.initializeBricks()
+    void grid.initializeBricks()
 
     const bricks = grid.getAllBricks()
     const numVoxels = numVoxelsX * numVoxelsY * numVoxelsZ
@@ -136,7 +136,7 @@ describe("Grid", () => {
     const testGrid = new Grid()
     testGrid.setVoxel({x: 0, y: 0, z: 0})
 
-    testGrid.initializeBricks()
+    void testGrid.initializeBricks()
 
     return expect(testGrid.getAllBricks().size).to.equal(1)
   })

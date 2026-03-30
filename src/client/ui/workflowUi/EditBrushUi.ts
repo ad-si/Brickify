@@ -72,10 +72,8 @@ export default class EditBrushUi {
     if (!this._selectedBrush && (this._brushList.length > 0)) {
       this._bigBrushSelected = false
       const lastBrush = this._brushList[this._brushList.length - 1]
-      if (lastBrush) {
-        this._brushSelect(lastBrush)
+      this._brushSelect(lastBrush)
       return
-      }
     }
   }
 
@@ -109,10 +107,12 @@ export default class EditBrushUi {
     if (this._bigBrushSelected) {
       brush.bigBrushButton.addClass("active")
     }
-    typeof brush.onBrushSelect === "function" ? brush.onBrushSelect(this.selectedNode, this._bigBrushSelected) : undefined
+    if (typeof brush.onBrushSelect === "function") {
+      brush.onBrushSelect(this.selectedNode, this._bigBrushSelected)
+    }
   }
 
-  _deselectBrush (node: Node | null): null | void {
+  _deselectBrush (node: Node | null): null | undefined {
     if (this._selectedBrush != null) {
       if (typeof this._selectedBrush.onBrushDeselect === "function") {
         this._selectedBrush.onBrushDeselect(node)
@@ -121,6 +121,7 @@ export default class EditBrushUi {
       this._selectedBrush.bigBrushButton.removeClass("active")
       return this._selectedBrush = null
     }
+    return undefined
   }
 
   getSelectedBrush () {

@@ -7,7 +7,9 @@ import clone from "clone"
 import * as fileLoader from "./modelLoading/fileLoader.js"
 import * as fileDropper from "./modelLoading/fileDropper.js"
 
-import globalConfig from "../common/globals.yaml"
+import globalConfigRaw from "../common/globals.yaml"
+import type { GlobalConfig } from "../types/index.js"
+const globalConfig = globalConfigRaw as unknown as GlobalConfig & Record<string, unknown>
 
 // Set renderer size to fit to 3 bootstrap columns
 globalConfig.staticRendererSize = true
@@ -49,7 +51,7 @@ config2.downloadSettings = {
 // instantiate 2 brickify bundles
 config1.renderAreaId = "renderArea1"
 const bundle1 = new Bundle(config1)
-var b1 = bundle1.init()
+const b1 = bundle1.init()
   .then(() => {
     const controls = bundle1.getControls() as { animation: { orbit(opts: { yawSpeed: number }): void } } | null
     controls?.animation.orbit({yawSpeed: -1 / 30})
@@ -61,12 +63,12 @@ var b1 = bundle1.init()
       void b1
         .then(() => bundle1.sceneManager.clearScene())
         .then(() => bundle1.loadByIdentifier(identifier))
-        .then(() => $("#" + config1.renderAreaId)
+        .then(() => $(`#${config1.renderAreaId}`)
           .css("backgroundImage", "none"))
       void b2
         .then(() => bundle2.sceneManager.clearScene())
         .then(() => bundle2.loadByIdentifier(identifier))
-        .then(() => $("#" + config2.renderAreaId)
+        .then(() => $(`#${config2.renderAreaId}`)
           .css("backgroundImage", "none"))
       return $(".applink")
         .prop("href", `app#initialModel=${identifier}`)

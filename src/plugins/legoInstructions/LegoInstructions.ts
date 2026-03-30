@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore TS(2792) - node-png module may not have types
 import { PNG } from "node-png"
 import THREE from "three"
@@ -147,13 +148,13 @@ export default class LegoInstructions {
             // Take screenshots and convert them to png
             const screenshots = this._takeScreenshots(node, numLayers, camera)
               .then((images) => {
-                files.push(...Array.from(images || []))
+                files.push(...Array.from(images))
                 log.debug("Finished instruction screenshots")
               })
 
             // Load and save piece images
             const imageDownload = this._downloadPieceListImages(pieceList)
-              .then((imageFiles: FileData[]) => files.push(...Array.from(imageFiles || [])))
+              .then((imageFiles: FileData[]) => files.push(...Array.from(imageFiles)))
 
             return Promise.all([screenshots, imageDownload])
               .then(() => files)
@@ -216,7 +217,7 @@ export default class LegoInstructions {
         const flippedImage = this._flipAndFitImage(pixelData)
         return this._convertToPng(flippedImage)
           .then((pngData: Uint8Array) => ({
-            fileName: `img/instructions/layer-${layer}.png`,
+            fileName: `img/instructions/layer-${String(layer)}.png`,
             data: pngData.buffer as ArrayBuffer,
             imageWidth: flippedImage.width,
           }))
@@ -336,8 +337,8 @@ td{min-width: 80px;} \
 
     for (let i = 1, end = numLayers, asc = end >= 1; asc ? i <= end : i >= end; asc ? i++ : i--) {
       html += "<br><br>"
-      html += '<h3 class="pageBreak"> Layer ' + i + "</h3>"
-      html += '<p><img src="img/instructions/layer-' + i + '.png"></p>'
+      html += `<h3 class="pageBreak"> Layer ${String(i)}</h3>`
+      html += `<p><img src="img/instructions/layer-${String(i)}.png"></p>`
     }
 
     html += "</body></html>"
@@ -355,7 +356,7 @@ td{min-width: 80px;} \
   _downloadPieceImage (piece: PieceListItem): Promise<FileData> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
-      const fileName = `img/partList/partList-${piece.sizeIndex + 1}.png`
+      const fileName = `img/partList/partList-${String(piece.sizeIndex + 1)}.png`
       xhr.open("GET", fileName)
       xhr.responseType = "arraybuffer"
       xhr.onload = function (_event: ProgressEvent) {

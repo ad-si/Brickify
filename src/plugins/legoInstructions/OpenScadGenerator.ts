@@ -74,7 +74,7 @@ interface Brick {
 }
 
 function toScadVector (vector: Vector3): string {
-  return `[${vector.x}, ${vector.y}, ${vector.z}]`
+  return `[${String(vector.x)}, ${String(vector.y)}, ${String(vector.z)}]`
 }
 
 export default function generateScad (bricks: Brick[]) {

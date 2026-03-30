@@ -73,8 +73,8 @@ export default class PreviewUi {
   _initStabilityView () {
     this.stabilityViewEnabled = false
     this.$stabilityViewButton = $("#stabilityCheckButton")
-    return this.$stabilityViewButton.click(() => {
-      this.toggleStabilityView()
+    return this.$stabilityViewButton.on("click", () => {
+      void this.toggleStabilityView()
       this.workflowUi.hideMenuIfPossible()
     })
   }
@@ -115,7 +115,8 @@ export default class PreviewUi {
   _initAssemblyView () {
     this.assemblyViewEnabled = false
     this.$assemblyViewButton = $("#buildButton")
-    this.$assemblyViewButton.click(this.toggleAssemblyView)
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    this.$assemblyViewButton.on("click", this.toggleAssemblyView)
     return this.previewAssemblyUi = new PreviewAssemblyUi(this)
   }
 
@@ -125,7 +126,7 @@ export default class PreviewUi {
     }
     this.$assemblyViewButton.removeClass("active disabled")
     this.assemblyViewEnabled = false
-    this.previewAssemblyUi.setEnabled(false)
+    void this.previewAssemblyUi.setEnabled(false)
     this.editController.enableInteraction()
   }
 
@@ -143,7 +144,7 @@ export default class PreviewUi {
     this.$assemblyViewButton.toggleClass("active", this.assemblyViewEnabled)
     this.$stabilityViewButton.toggleClass("disabled", this.assemblyViewEnabled)
 
-    this.previewAssemblyUi.setEnabled(this.assemblyViewEnabled)
+    void this.previewAssemblyUi.setEnabled(this.assemblyViewEnabled)
 
     if (this.assemblyViewEnabled) {
       this.editController.disableInteraction()

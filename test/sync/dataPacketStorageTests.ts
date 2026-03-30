@@ -15,7 +15,7 @@ describe("server-side dataPacket-storage tests", () => {
 
   describe("dataPacket creation", () => { it("should create empty packets", () => {
     const response = Response()
-    dataPackets.create(Request(), response)
+    void dataPackets.create(Request(), response)
     return response.whenSent.then(() => {
       expect(response).to.have.property("type", "json")
       expect(response).to.have.property("code", 201)
@@ -27,7 +27,7 @@ describe("server-side dataPacket-storage tests", () => {
   describe("dataPacket existence checks", () => {
     it("should reject invalid id exists checks", () => {
       const response = Response()
-      dataPackets.exists(
+      void dataPackets.exists(
         Request({id: "äöü"}),
         response,
       )
@@ -40,7 +40,7 @@ describe("server-side dataPacket-storage tests", () => {
     it("should not find non existing packet", () => {
       const response = Response()
       const id = "abcdefgh"
-      dataPackets.exists(
+      void dataPackets.exists(
         Request({id}),
         response,
       )
@@ -54,13 +54,13 @@ describe("server-side dataPacket-storage tests", () => {
 
     it("should find existing packet", () => {
       const createResponse = Response()
-      dataPackets.create(Request(), createResponse)
+      void dataPackets.create(Request(), createResponse)
       return createResponse.whenSent.then(() => {
         const {
           id,
         } = createResponse.content as { id: string }
         const existsResponse = Response()
-        dataPackets.exists(
+        void dataPackets.exists(
           Request({id}),
           existsResponse,
         )
@@ -76,7 +76,7 @@ describe("server-side dataPacket-storage tests", () => {
   describe("dataPacket get requests", () => {
     it("should reject invalid id gets", () => {
       const response = Response()
-      dataPackets.get(
+      void dataPackets.get(
         Request({id: "äöü"}),
         response,
       )
@@ -88,7 +88,7 @@ describe("server-side dataPacket-storage tests", () => {
 
     it("should not get non existing packet", () => {
       const response = Response()
-      dataPackets.get(
+      void dataPackets.get(
         Request({id: "abcdefgh"}),
         response,
       )
@@ -102,20 +102,20 @@ describe("server-side dataPacket-storage tests", () => {
 
     it("should return existing packet", () => {
       const createResponse = Response()
-      dataPackets.create(Request(), createResponse)
+      void dataPackets.create(Request(), createResponse)
       return createResponse.whenSent.then(() => {
         const {
           id,
         } = createResponse.content as { id: string }
         const content = {a: 0, b: "c"}
         const putResponse = Response()
-        dataPackets.put(
+        void dataPackets.put(
           Request({id}, content),
           putResponse,
         )
         return putResponse.whenSent.then(() => {
           const getResponse = Response()
-          dataPackets.get(
+          void dataPackets.get(
             Request({id}),
             getResponse,
           )
@@ -133,7 +133,7 @@ describe("server-side dataPacket-storage tests", () => {
   describe("dataPacket put requests", () => {
     it("should reject invalid id puts", () => {
       const response = Response()
-      dataPackets.put(
+      void dataPackets.put(
         Request({id: "äöü"}, {a: 0, b: "c"}),
         response,
       )
@@ -145,7 +145,7 @@ describe("server-side dataPacket-storage tests", () => {
 
     it("should not put non existing packet", () => {
       const response = Response()
-      dataPackets.put(
+      void dataPackets.put(
         Request({id: "abcdefgh"}, {a: 0, b: "c"}),
         response,
       )
@@ -159,14 +159,14 @@ describe("server-side dataPacket-storage tests", () => {
 
     it("should put existing packet", () => {
       const createResponse = Response()
-      dataPackets.create(Request(), createResponse)
+      void dataPackets.create(Request(), createResponse)
       return createResponse.whenSent.then(() => {
         const {
           id,
         } = createResponse.content as { id: string }
         const content = {a: 0, b: "c"}
         const putResponse = Response()
-        dataPackets.put(
+        void dataPackets.put(
           Request({id}, content),
           putResponse,
         )
@@ -182,7 +182,7 @@ describe("server-side dataPacket-storage tests", () => {
   describe("dataPacket deletion", () => {
     it("should reject invalid id puts", () => {
       const response = Response()
-      dataPackets.delete_(
+      void dataPackets.delete_(
         Request({id: "äöü"}, {a: 0, b: "c"}),
         response,
       )
@@ -194,7 +194,7 @@ describe("server-side dataPacket-storage tests", () => {
 
     it("should not delete non existing packet", () => {
       const response = Response()
-      dataPackets.delete_(
+      void dataPackets.delete_(
         Request({id: "abcdefgh"}, {a: 0, b: "c"}),
         response,
       )
@@ -208,10 +208,10 @@ describe("server-side dataPacket-storage tests", () => {
 
     it("should delete specified packets", () => {
       const createResponse = Response()
-      dataPackets.create(Request(), createResponse)
+      void dataPackets.create(Request(), createResponse)
       return createResponse.whenSent.then(() => {
         const deleteResponse = Response()
-        dataPackets.delete_(
+        void dataPackets.delete_(
           Request({id: (createResponse.content as { id: string }).id}),
           deleteResponse,
         )
@@ -225,19 +225,19 @@ describe("server-side dataPacket-storage tests", () => {
 
     it("should not find deleted packets", () => {
       const createResponse = Response()
-      dataPackets.create(Request(), createResponse)
+      void dataPackets.create(Request(), createResponse)
       return createResponse.whenSent.then(() => {
         const {
           id,
         } = createResponse.content as { id: string }
         const deleteResponse = Response()
-        dataPackets.delete_(
+        void dataPackets.delete_(
           Request({id}),
           deleteResponse,
         )
         return deleteResponse.whenSent.then(() => {
           const existsResponse = Response()
-          dataPackets.exists(
+          void dataPackets.exists(
             Request({id}),
             existsResponse,
           )

@@ -47,7 +47,7 @@ export default class LayoutOptimizer {
         break
       }
       else {
-        this.splitBricksAndRelayoutLocally(bricksToSplit, grid, false, false)
+        void this.splitBricksAndRelayoutLocally(bricksToSplit, grid, false, false)
       }
     }
 
@@ -72,6 +72,7 @@ export default class LayoutOptimizer {
       })
 
       if (conLabels.size > 0) {
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
         const smallestLabel = DataHelper.smallestElement(conLabels)!
         // Assign label to this brick
         brick.label = labels[smallestLabel]!
@@ -80,6 +81,7 @@ export default class LayoutOptimizer {
             labels[i] = labels[smallestLabel]!
           }
         }
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
 
       }
       else { // No neighbor has a label
@@ -91,6 +93,7 @@ export default class LayoutOptimizer {
     })
 
     // Second pass - applying labels
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     bricks.forEach((brick: Brick) => brick.label = labels[brick.label!]!)
 
     // Count number of components
@@ -172,7 +175,7 @@ export default class LayoutOptimizer {
     bricksToBeDeleted.forEach((brick: Brick) => newBricks.delete(brick))
 
     if (useThreeLayers && this.brickLayouter) {
-      this.brickLayouter.layout(grid, newBricks)
+      void this.brickLayouter.layout(grid, newBricks)
     }
     return this.plateLayouter.layout(grid, newBricks)
       .then(() => ({

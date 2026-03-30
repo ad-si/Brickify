@@ -65,7 +65,7 @@ export default class Bundle {
   }
 
   getPlugin (name: string) {
-    const instances = this.pluginInstances || []
+    const instances = this.pluginInstances
     for (const p of instances) {
       if (p.name === name) {
         return p

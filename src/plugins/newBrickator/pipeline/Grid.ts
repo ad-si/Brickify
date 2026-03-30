@@ -16,9 +16,7 @@ interface GridSpacing {
   z: number
 }
 
-interface VoxelMap {
-  [key: string]: Voxel
-}
+type VoxelMap = Partial<Record<string, Voxel>>
 
 interface Model {
   getBoundingBox: () => Promise<{ min: Point3D; max: Point3D }>
@@ -246,7 +244,7 @@ export default class Grid {
 
   // Generates a key for a hashmap from the given coordinates
   _generateKey (x: number, y: number, z: number): string {
-    return x + "-" + y + "-" + z
+    return `${String(x)}-${String(y)}-${String(z)}`
   }
 
   setVoxel (position: Point3D): Voxel {
@@ -313,13 +311,10 @@ export default class Grid {
   }
 
   forEachVoxel (callback: (voxel: Voxel) => void) {
-    return (() => {
-      const result: void[] = []
-      for (const key of Object.keys(this.voxels || {})) {
-        result.push(callback(this.voxels[key]))
-      }
-      return result
-    })()
+    for (const key of Object.keys(this.voxels)) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      callback(this.voxels[key]!)
+    }
   }
 
   getDisabledVoxels (): Voxel[] {
@@ -409,6 +404,7 @@ export default class Grid {
 
   // Chooses a random brick
   chooseRandomBrick (): Brick {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while (true) {
       const x = this._minVoxelX + Random.next(this.getNumVoxelsX())
       const y = this._minVoxelY + Random.next(this.getNumVoxelsY())

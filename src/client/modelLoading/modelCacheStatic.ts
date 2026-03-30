@@ -6,7 +6,7 @@ import log from "loglevel"
 // Used for static builds that run without a server
 
 // The cache of optimized model promises
-const modelCache: Record<string, Promise<MeshlibModel>> = {}
+const modelCache: Partial<Record<string, Promise<MeshlibModel>>> = {}
 
 // For static builds, we check if the model file exists via fetch
 export const exists = (identifier: string): Promise<string> => fetch(`./model/${identifier}`, { method: 'HEAD' })

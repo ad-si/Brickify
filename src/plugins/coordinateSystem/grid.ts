@@ -24,7 +24,7 @@ export default function (threejsNode: Object3D, globalConfig: GlobalConfig) {
 
   Every 5<sup>th</sup> and 10<sup>th</sup> line is thicker than the others.
 */
-var setupMaterials = function (globalConfig: GlobalConfig) {
+const setupMaterials = function (globalConfig: GlobalConfig) {
   materialGridNormal = new THREE.LineBasicMaterial({
     color: globalConfig.colors.gridNormal,
     linewidth: globalConfig.gridLineWidthNormal,
@@ -46,7 +46,7 @@ var setupMaterials = function (globalConfig: GlobalConfig) {
   Construct grid lines that are on the X and Y axis<br>
   Make half as big to prevent z-fighting with colored axis indicators
 */
-var axisLines = function (threejsNode: Object3D, globalConfig: GlobalConfig) {
+const axisLines = function (threejsNode: Object3D, globalConfig: GlobalConfig) {
   const material = materialGrid10
   const gridLineGeometryXPositive = new THREE.Geometry()
   const gridLineGeometryYPositive = new THREE.Geometry()
@@ -98,7 +98,7 @@ var axisLines = function (threejsNode: Object3D, globalConfig: GlobalConfig) {
 
   Construct grid lines that are not on the X or Y axis
 */
-var otherLines = function (threejsNode: Object3D, globalConfig: GlobalConfig) {
+const otherLines = function (threejsNode: Object3D, globalConfig: GlobalConfig) {
   return (() => {
     const result: THREE.Object3D[] = []
     for (let i = 1, end = globalConfig.gridSize / globalConfig.gridStepSize, asc = end >= 1; asc ? i <= end : i >= end; asc ? i++ : i--) {

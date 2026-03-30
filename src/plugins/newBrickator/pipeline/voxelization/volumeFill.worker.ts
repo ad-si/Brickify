@@ -14,7 +14,7 @@ interface CallbackMessage {
 }
 
 self.onmessage = (event: MessageEvent<WorkerMessage>) => {
-  const { type, data } = event.data || {}
+  const { type, data } = event.data
   if (type === 'fillGrid') {
     const { gridPOJO } = data
     const callback = (message: CallbackMessage) => {

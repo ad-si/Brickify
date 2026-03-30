@@ -13,10 +13,10 @@ interface Packet {
 const STORAGE_KEY = 'brickify_datapackets'
 
 function generateId(): string {
-  return 'dp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+  return `dp_${String(Date.now())}_${Math.random().toString(36).slice(2, 11)}`
 }
 
-function getStorage(): Record<string, Packet> {
+function getStorage(): Partial<Record<string, Packet>> {
   try {
     const data = localStorage.getItem(STORAGE_KEY)
     return data ? JSON.parse(data) : {}
@@ -25,7 +25,7 @@ function getStorage(): Record<string, Packet> {
   }
 }
 
-function saveStorage(packets: Record<string, Packet>): void {
+function saveStorage(packets: Partial<Record<string, Packet>>): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(packets))
   } catch {
@@ -83,7 +83,7 @@ export const put = (packet: Packet): Promise<string> => {
 export const delete_ = (id: string): Promise<void> => {
   const packets = getStorage()
   if (packets[id]) {
-    delete packets[id]
+    Reflect.deleteProperty(packets, id)
     saveStorage(packets)
     return Promise.resolve()
   }

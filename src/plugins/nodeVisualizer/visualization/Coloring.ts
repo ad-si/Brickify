@@ -46,7 +46,7 @@ interface Dimensions {
 // Provides a simple implementation on how to color voxels and bricks
 export default class Coloring {
   globalConfig: GlobalConfigType
-  textureMaterialCache: { [key: string]: MeshLambertMaterial }
+  textureMaterialCache: Partial<Record<string, MeshLambertMaterial>>
   brickMaterial: MeshLambertMaterial
   studTexture: Texture
   selectedMaterial: MeshLambertMaterial
@@ -86,7 +86,7 @@ export default class Coloring {
       brickShadowOpacity: 0.5,
       modelShadowOpacity: 0.5,
     } }
-    const mergedColors = Object.assign({}, defaultConfig.colors, (globalConfig && globalConfig.colors) || {})
+    const mergedColors = Object.assign({}, defaultConfig.colors, globalConfig?.colors)
     this.globalConfig = Object.assign({}, defaultConfig, globalConfig, { colors: mergedColors })
     this.textureMaterialCache = {}
 
@@ -114,7 +114,7 @@ export default class Coloring {
       transparent: true,
       opacity: 0.3,
     })
-    this._setPolygonOffset(this.legoShadowMat, +2, +2)
+    this._setPolygonOffset(this.legoShadowMat, 2, 2)
 
     // printed object material
     this.objectPrintMaterial = this._createMaterial(
@@ -123,7 +123,7 @@ export default class Coloring {
     )
 
     // remove z-Fighting on baseplate
-    this._setPolygonOffset(this.objectPrintMaterial, +3, +3)
+    this._setPolygonOffset(this.objectPrintMaterial, 3, 3)
 
     this.objectShadowMat = new THREE.MeshBasicMaterial({
       color: 0x000000,
@@ -131,7 +131,7 @@ export default class Coloring {
       opacity: 0.4,
       depthFunc: (THREE as unknown as { GreaterDepth: number }).GreaterDepth,
     })
-    this._setPolygonOffset(this.objectShadowMat, +3, +3)
+    this._setPolygonOffset(this.objectShadowMat, 3, 3)
 
     const lineMaterialGenerator = new LineMatGenerator()
     this.objectLineMat = lineMaterialGenerator.generate(0x000000) as unknown as LineBasicMaterial
@@ -270,9 +270,11 @@ export default class Coloring {
       break
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     materials!.textureStuds = this.getTextureMaterialForBrick(brick)
 
     brick.visualizationMaterials = materials
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return brick.visualizationMaterials!
   }
 
@@ -381,6 +383,6 @@ export default class Coloring {
   }
 
   _getHash (dimensions: Dimensions): string {
-    return dimensions.x + "-" + dimensions.y
+    return `${String(dimensions.x)}-${String(dimensions.y)}`
   }
 }

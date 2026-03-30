@@ -189,8 +189,8 @@ export function generateQuad (
   const shaderCode = ShaderGenerator.generateShader(usedShaderParts)
 
   // Get width/height from render target or texture
-  const textureWidth = (rttTexture as WebGLRenderTarget).width ?? (rttTexture as unknown as { width: number }).width
-  const textureHeight = (rttTexture as WebGLRenderTarget).height ?? (rttTexture as unknown as { height: number }).height
+  const textureWidth = (rttTexture as WebGLRenderTarget).width
+  const textureHeight = (rttTexture as WebGLRenderTarget).height
 
   const baseUniforms: UniformsDictionary = {
     tDepth: { type: "t", value: rttDepthTexture },
@@ -201,6 +201,7 @@ export function generateQuad (
   }
 
   for (const attribute in additionalUniforms) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     baseUniforms[attribute] = additionalUniforms[attribute]!
   }
 
@@ -271,7 +272,7 @@ export function deleteRenderTarget (renderTarget: RenderTargetDescriptor, threeR
   renderTarget.renderTarget.dispose()
 
   const depthTextureWithWebGL = renderTarget.depthTexture as DepthTextureWithWebGL
-  if (depthTextureWithWebGL?.__webglTexture != null) {
+  if (depthTextureWithWebGL.__webglTexture != null) {
     threeRenderer.context.deleteTexture(
       depthTextureWithWebGL.__webglTexture,
     )

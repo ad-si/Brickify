@@ -143,7 +143,7 @@ export default class Brick {
     }
     const iterator = this.voxels.entries()
     const result = iterator.next()
-    if (result.done || !result.value) {
+    if (result.done) {
       return null
     }
     return result.value[0]
@@ -192,11 +192,13 @@ export default class Brick {
       z = Math.min(voxel.position.z, z)
     })
 
+    /* eslint-disable @typescript-eslint/no-non-null-assertion */
     this._position = {
       x: x!,
       y: y!,
       z: z!,
     }
+    /* eslint-enable @typescript-eslint/no-non-null-assertion */
     return this._position
   }
 
@@ -219,12 +221,15 @@ export default class Brick {
         size.maxZ = size.minZ != null ? size.minZ : size.minZ = voxel.position.z
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       if (size.minX! > voxel.position.x) {
         size.minX = voxel.position.x
       }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       if (size.minY! > voxel.position.y) {
         size.minY = voxel.position.y
       }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       if (size.minZ! > voxel.position.z) {
         size.minZ = voxel.position.z
       }
@@ -240,11 +245,13 @@ export default class Brick {
       }
     })
 
+    /* eslint-disable @typescript-eslint/no-non-null-assertion */
     this._size = {
       x: (size.maxX! - size.minX!) + 1,
       y: (size.maxY! - size.minY!) + 1,
       z: (size.maxZ! - size.minZ!) + 1,
     }
+    /* eslint-enable @typescript-eslint/no-non-null-assertion */
 
     return this._size
   }
@@ -384,7 +391,7 @@ export default class Brick {
       }
     }
     this._visualBrick = visualBrick
-    this._visualBrick != null ? this._visualBrick.setBrick(this) : undefined
+    if (this._visualBrick != null) { this._visualBrick.setBrick(this) }
   }
 
   // Removes all references to this brick from voxels
@@ -468,7 +475,7 @@ export default class Brick {
       for (y = p.y, end1 = p.y + s.y, asc1 = p.y <= end1; asc1 ? y < end1 : y > end1; asc1 ? y++ : y--) {
         let asc2: boolean; let end2: number
         for (z = p.z, end2 = p.z + s.z, asc2 = p.z <= end2; asc2 ? z < end2 : z > end2; asc2 ? z++ : z--) {
-          voxelCheck[x + "-" + y + "-" + z] = false
+          voxelCheck[`${String(x)}-${String(y)}-${String(z)}`] = false
         }
       }
     }
@@ -476,7 +483,7 @@ export default class Brick {
     this.forEachVoxel((voxel) => {
       const vp = voxel.position
       if (voxel.isLego()) {
-        voxelCheck[vp.x + "-" + vp.y + "-" + vp.z] = true
+        voxelCheck[`${String(vp.x)}-${String(vp.y)}-${String(vp.z)}`] = true
       }
     })
 

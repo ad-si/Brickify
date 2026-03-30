@@ -37,8 +37,8 @@ export default class WorkflowUi {
   // Called by sceneManager when a node is removed
   onNodeRemove (_node: Node): Promise<unknown[] | undefined> {
     this.workflow.preview.quit()
-    return this.bundle.sceneManager.scene.then((scene: Scene) => {
-      if (scene.nodes.length === 0) {
+    return this.bundle.sceneManager.scene.then((scene: Scene | undefined) => {
+      if (scene == null || scene.nodes.length === 0) {
         return this.enableOnly(this.workflow.load)
       }
       return undefined
@@ -58,9 +58,7 @@ export default class WorkflowUi {
       const result: unknown[] = []
       for (const step in this.workflow) {
         const ui = this.workflow[step]
-        if (ui) {
-          result.push(ui.setEnabled(ui === groupUi))
-        }
+        result.push(ui.setEnabled(ui === groupUi))
       }
       return result
     })()
@@ -75,10 +73,8 @@ export default class WorkflowUi {
       const result: unknown[] = []
       for (const step in this.workflow) {
         const ui = this.workflow[step]
-        if (ui) {
-          result.push(ui.setEnabled(Array.from(groupsList)
-            .includes(step)))
-        }
+        result.push(ui.setEnabled(Array.from(groupsList)
+          .includes(step)))
       }
       return result
     })()
@@ -112,7 +108,7 @@ export default class WorkflowUi {
       $("#leftSidebar").addClass("collapsed-sidebar")
     }
     return $("#toggleMenu")
-      .click(() => this.toggleMenu())
+      .on("click", () => this.toggleMenu())
   }
 
   toggleMenu () {

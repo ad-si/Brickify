@@ -21,7 +21,7 @@ export default class ShareUi {
 Please check back later.",
     })
 
-    return this.$shareButton.click(() => {
+    return this.$shareButton.on("click", () => {
       return alertCallback()
     })
   }

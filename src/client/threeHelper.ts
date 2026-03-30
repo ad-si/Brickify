@@ -54,7 +54,7 @@ interface PointerControls {
 }
 
 export function getBoundingSphere (threeNode: Object3D): BoundingSphereResult | Sphere {
-  if ((threeNode as Mesh).geometry != null) {
+  if ((threeNode as Partial<Mesh>).geometry) {
     const geometry = (threeNode as Mesh).geometry
     geometry.computeBoundingSphere()
     const boundingSphere = geometry.boundingSphere

@@ -11,7 +11,7 @@ interface Packet {
 }
 
 // A map of promises that resolve to the respective packet or reject with its id
-let packets: Record<string, Promise<Packet>> = {}
+let packets: Partial<Record<string, Promise<Packet>>> = {}
 
 // cache is the big brother of put: it will always store the packet and resolve
 export const cache = (packet: Packet): Promise<Packet> => {
@@ -23,7 +23,7 @@ export const cache = (packet: Packet): Promise<Packet> => {
 // ensureDelete is the big brother of delete: it will delete the packet if
 // present and always resolve
 export const ensureDelete = function (id: string): Promise<void> {
-  delete packets[id]
+  Reflect.deleteProperty(packets, id)
   return Promise.resolve()
 }
 

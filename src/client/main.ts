@@ -20,7 +20,7 @@ else {
 
 type CommandFunction = (value: string) => Promise<void> | void
 
-const commandFunctions: Record<string, CommandFunction> = {
+const commandFunctions: Partial<Record<string, CommandFunction>> = {
   initialModel (identifier: string) {
     // load selected model
     log.debug("loading initial model")
@@ -37,12 +37,13 @@ const postInitCallback = function () {
   hash = hash.substring(1, hash.length)
   const commands = hash.split("+")
   let prom = Promise.resolve()
-  const runCmd = (key: string, value: string) => () => Promise.resolve(commandFunctions[key]?.(value))
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const runCmd = (key: string, value: string) => () => Promise.resolve(commandFunctions[key]!(value))
   for (const cmd of Array.from(commands)) {
     const key = cmd.split("=")[0]
     const value = cmd.split("=")[1]
     if (key && commandFunctions[key] != null) {
-      prom = prom.then(runCmd(key, value ?? ""))
+      prom = prom.then(runCmd(key, value))
     }
   }
 
@@ -50,7 +51,7 @@ const postInitCallback = function () {
   return window.location.hash = ""
 }
 
-var bundle = new Bundle(globalConfig)
+const bundle = new Bundle(globalConfig)
 void bundle.init()
   .then(postInitCallback)
 
@@ -59,17 +60,17 @@ void bootstrapReady.then(() => {
   // init direct help (always available)
   ($("#cmdHelp") as JQuery & { tooltip(opts: unknown): JQuery })
     .tooltip({placement: "bottom"})
-    .click(() => { (bundle as Bundle & { ui: { hotkeys: { showHelp(): void } } }).ui.hotkeys.showHelp() })
+    .on("click", () => { (bundle as Bundle & { ui: { hotkeys: { showHelp(): void } } }).ui.hotkeys.showHelp() })
 
   // init share logic (only works with server session)
   $.get("/share")
     .then((link) => {
       ZeroClipboard.config(
         {swfPath: "/node_modules/zeroclipboard/dist/ZeroClipboard.swf"})
-      const url = document.location.origin + "/app?share=" + link
+      const url = `${document.location.origin}/app?share=${String(link)}`
       ;($("#cmdShare") as JQuery & { tooltip(opts: unknown): JQuery })
         .tooltip({placement: "bottom"})
-        .click(() => {
+        .on("click", () => {
           void (bundle as Bundle & { saveChanges(): Promise<void> }).saveChanges()
             .then(() =>
               bootbox.dialog({

@@ -1,6 +1,6 @@
 // Returns whether or not at least one element of the input
 // array in not null/undefined
-export function anyDefinedInArray<T> (array: (T | null | undefined)[]): boolean {
+export function anyDefinedInArray (array: unknown[]): boolean {
   return array.some(entry => entry != null)
 }
 

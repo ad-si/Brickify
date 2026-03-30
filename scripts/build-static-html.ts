@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument */
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -7,20 +8,34 @@ import stylus from 'stylus'
 import nib from 'nib'
 import bootstrap from 'bootstrap-styl'
 
+interface Sample {
+  name: string
+  printTime: number
+  [key: string]: unknown
+}
+
+interface GlobalConfig {
+  colors: {
+    background: number
+    [key: string]: unknown
+  }
+  [key: string]: unknown
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(__dirname, '..')
 const distDir = path.resolve(projectRoot, 'dist-static')
 const samplesDirectory = path.resolve(projectRoot, 'modelSamples')
 const globalConfig = yaml.load(
   fs.readFileSync(path.resolve(projectRoot, 'src/common/globals.yaml'), 'utf8')
-)
+) as GlobalConfig
 
-function loadSamples() {
-  const samples = {}
+function loadSamples(): Sample[] {
+  const samples: Record<string, Sample> = {}
   fs.readdirSync(samplesDirectory)
     .filter(file => file.endsWith('.yaml'))
-    .map(file => yaml.load(fs.readFileSync(path.join(samplesDirectory, file), 'utf8')))
-    .forEach(sample => samples[sample.name] = sample)
+    .map(file => yaml.load(fs.readFileSync(path.join(samplesDirectory, file), 'utf8')) as Sample)
+    .forEach(sample => { samples[sample.name] = sample })
 
   return Object.keys(samples)
     .map(key => samples[key])
@@ -30,7 +45,7 @@ function loadSamples() {
 const samples = loadSamples()
 
 const mockApp = {
-  get: (key) => {
+  get: (key: string) => {
     if (key === 'env') return 'production'
     return null
   }
@@ -42,7 +57,7 @@ const commonLocals = {
   samples
 }
 
-function compileTemplate(templatePath, outputPath, locals = {}) {
+function compileTemplate(templatePath: string, outputPath: string, locals: Record<string, unknown> = {}) {
   const fullTemplatePath = path.resolve(projectRoot, templatePath)
   let html = jade.renderFile(fullTemplatePath, {
     ...commonLocals,
@@ -86,8 +101,11 @@ const stylusSource = fs.readFileSync(
   'utf8'
 )
 
-const compiledCss = await new Promise((resolve, reject) => {
-  stylus(stylusSource)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const stylusInstance = stylus(stylusSource) as any
+
+const compiledCss = await new Promise<string>((resolve, reject) => {
+  stylusInstance
     .set('filename', path.resolve(projectRoot, 'public/styles/screen.styl'))
     .set('compress', true)
     .set('include css', true)
@@ -97,9 +115,9 @@ const compiledCss = await new Promise((resolve, reject) => {
     ])
     .use(nib())
     .use(bootstrap())
-    .define('backgroundColor', '#' + ('000000' +
-      globalConfig.colors.background.toString(16)).slice(-6))
-    .render((err, css) => {
+    .define('backgroundColor', `#${('000000' +
+      globalConfig.colors.background.toString(16)).slice(-6)}`)
+    .render((err: Error | null, css: string) => {
       if (err) reject(err instanceof Error ? err : new Error(String(err)))
       else resolve(css)
     })

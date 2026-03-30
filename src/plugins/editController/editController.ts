@@ -78,6 +78,7 @@ export default class EditController {
     if (this.interactionDisabled) {
       return false
     }
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if ((this.nodeVisualizer == null) || (this.pointEventHandler == null)) {
       return false
     }

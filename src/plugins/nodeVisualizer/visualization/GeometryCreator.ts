@@ -38,10 +38,10 @@ interface ExtendedMesh extends Mesh {
 export default class GeometryCreator {
   globalConfig: GlobalConfigType
   grid: Grid
-  brickGeometryCache: { [key: string]: BoxGeometry }
-  studGeometryCache: { [key: string]: BufferGeometry }
-  highFiStudGeometryCache: { [key: string]: BufferGeometry }
-  planeGeometryCache: { [key: string]: BufferGeometry }
+  brickGeometryCache: Partial<Record<string, BoxGeometry>>
+  studGeometryCache: Partial<Record<string, BufferGeometry>>
+  highFiStudGeometryCache: Partial<Record<string, BufferGeometry>>
+  planeGeometryCache: Partial<Record<string, BufferGeometry>>
   studGeometry: CylinderGeometry
   highFiStudGeometry: CylinderGeometry
 
@@ -171,7 +171,7 @@ export default class GeometryCreator {
     return brickGeometry
   }
 
-  _getStudsGeometry (brickDimensions: Dimensions, worldBrickSize: Position, cache: { [key: string]: BufferGeometry }, geometry: Geometry): BufferGeometry {
+  _getStudsGeometry (brickDimensions: Dimensions, worldBrickSize: Position, cache: Partial<Record<string, BufferGeometry>>, geometry: Geometry): BufferGeometry {
     // returns studs for the given brick size
 
     const dimensionsHash = this._getHash(brickDimensions)
@@ -225,6 +225,6 @@ export default class GeometryCreator {
   }
 
   _getHash (dimensions: Dimensions): string {
-    return dimensions.x + "-" + dimensions.y + "-" + dimensions.z
+    return `${String(dimensions.x)}-${String(dimensions.y)}-${String(dimensions.z)}`
   }
 }

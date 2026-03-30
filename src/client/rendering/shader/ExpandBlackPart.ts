@@ -31,7 +31,7 @@ varying vec2 texelDelta;\
   getFragmentInMain () {
     const k = this.kernelSize
     return `\
-const int kernel = ${k};\n \
+const int kernel = ${String(k)};\n \
 bool isLine = false; \
 \
 for (int x = -1 * (kernel - 1); x < kernel; x++){\n \

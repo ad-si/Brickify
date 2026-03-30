@@ -25,10 +25,10 @@ export default class PluginHooks {
   }
 
   // **call the plugin's hook if provided with the passed arguments**
-  call<T = unknown>(plugin: Plugin, hook: string, ...args: unknown[]): T | undefined {
+  call(plugin: Plugin, hook: string, ...args: unknown[]): unknown {
     if (this.hasHook(plugin, hook)) {
-      const method = (plugin as Record<string, (...args: unknown[]) => T>)[hook]
-      return method?.(...args)
+      const method = (plugin as Record<string, (...args: unknown[]) => unknown>)[hook]
+      return (method as (...args: unknown[]) => unknown)(...args)
     }
     return undefined
   }
@@ -75,13 +75,13 @@ export default class PluginHooks {
   registerHook(plugin: Plugin, hook: string): void {
     const method = (plugin as Record<string, HookCallback | undefined>)[hook]
     if (typeof method === 'function') {
-      this.lists[hook]?.push(method.bind(plugin))
+      this.lists[hook].push(method.bind(plugin))
     }
   }
 
   // **get all callbacks that are registered for a specific hook**
   get(hook: string): HookCallback[] {
-    return this.lists[hook] ?? []
+    return this.lists[hook]
   }
 
   // **unregister a plugin for all hooks it was registered for**
@@ -96,11 +96,9 @@ export default class PluginHooks {
     const method = (plugin as Record<string, HookCallback | undefined>)[hook]
     if (typeof method === 'function') {
       const hookList = this.lists[hook]
-      if (hookList) {
-        const index = hookList.indexOf(method)
-        if (index !== -1) {
-          hookList.splice(index, 1)
-        }
+      const index = hookList.indexOf(method)
+      if (index !== -1) {
+        hookList.splice(index, 1)
       }
     }
   }

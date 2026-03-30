@@ -55,8 +55,6 @@ export default class DisposableResource {
   }
 
   track<T extends ThreeResource>(resource: T): T {
-    if (!resource) return resource
-
     if (this.disposed) {
       log.warn('Attempting to track resource on already disposed object')
       this.disposeResource(resource)
@@ -68,7 +66,7 @@ export default class DisposableResource {
   }
 
   trackChild<T extends ChildDisposable>(childDisposable: T): T {
-    if (!childDisposable || typeof childDisposable.dispose !== 'function') {
+    if (typeof childDisposable.dispose !== 'function') {
       log.warn('Attempting to track non-disposable child')
       return childDisposable
     }
@@ -92,7 +90,7 @@ export default class DisposableResource {
     // Dispose all child disposables first
     for (const child of this.childDisposables) {
       try {
-        if (child && typeof child.dispose === 'function') {
+        if (typeof child.dispose === 'function') {
           child.dispose()
         }
       } catch (error) {
@@ -118,8 +116,6 @@ export default class DisposableResource {
   }
 
   disposeResource(resource: ThreeResource): void {
-    if (!resource) return
-
     try {
       // Handle Three.js geometries
       if (resource.geometry) {
@@ -159,8 +155,6 @@ export default class DisposableResource {
   }
 
   disposeMaterial(material: Material | Material[]): void {
-    if (!material) return
-
     try {
       if (Array.isArray(material)) {
         // Handle material arrays
@@ -197,8 +191,6 @@ export default class DisposableResource {
 
   // Helper method for Three.js scene cleanup
   static disposeScene(scene: Scene): void {
-    if (!scene) return
-
     const toDispose: Object3D[] = []
 
     scene.traverse((object: Object3D) => {

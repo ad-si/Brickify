@@ -53,24 +53,24 @@ export default class Undo {
     }
     node.storePluginData("undo", nodeData)
     this.currentNode = node
-    this._updateUi()
+    void this._updateUi()
   }
 
   onNodeSelect (node: Node) {
     this.currentNode = node
-    this._updateUi()
+    void this._updateUi()
   }
 
   onNodeDeselect () {
     this.currentNode = nullNode
-    this._updateUi()
+    void this._updateUi()
   }
 
   onNodeRemove (node: Node) {
     if (node === this.currentNode) {
       this.currentNode = nullNode
     }
-    this._updateUi()
+    void this._updateUi()
   }
 
   addTask (undo: () => void, redo: () => void) {
@@ -80,7 +80,7 @@ export default class Undo {
         undoTasks.push({undo, redo})
         return redoTasks.length = 0
       })
-      .then(this._updateUi)
+      .then(() => this._updateUi())
   }
 
   undo () {
@@ -95,7 +95,7 @@ export default class Undo {
         redoTasks.push(action)
         action.undo()
       })
-      .then(this._updateUi)
+      .then(() => this._updateUi())
   }
 
   redo () {
@@ -110,7 +110,7 @@ export default class Undo {
         undoTasks.push(action)
         action.redo()
       })
-      .then(this._updateUi)
+      .then(() => this._updateUi())
   }
 
   getHotkeys () {
@@ -120,12 +120,12 @@ export default class Undo {
         {
           description: "Undo last brush action",
           hotkey: "ctrl+z",
-          callback: this.undo,
+          callback: () => { void this.undo() },
         },
         {
           description: "Redo last brush action",
           hotkey: "ctrl+y",
-          callback: this.redo,
+          callback: () => { void this.redo() },
         },
       ],
     }
@@ -135,8 +135,8 @@ export default class Undo {
     this.$undo = $("#undo")
     this.$redo = $("#redo")
 
-    this.$undo.click(this.undo)
-    return this.$redo.click(this.redo)
+    this.$undo.on("click", () => { void this.undo() })
+    return this.$redo.on("click", () => { void this.redo() })
   }
 
   _updateUi () {

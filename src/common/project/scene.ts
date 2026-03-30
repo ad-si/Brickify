@@ -50,7 +50,7 @@ export default class Scene extends SyncObject {
       return node.getName()
         .then((name: string | undefined) => {
           this.nodes.push(node)
-          return this._modify(`Node \"${name}\" added`)
+          return this._modify(`Node "${name ?? ""}" added`)
         })
     }
     return this.next(_addNode)
@@ -68,7 +68,7 @@ export default class Scene extends SyncObject {
           if (index !== -1) {
             this.nodes.splice(index, 1)
           }
-          return this._modify(`Node \"${name}\" removed`)
+          return this._modify(`Node "${name ?? ""}" removed`)
         })
     }
     return this.next(_removeNode)

@@ -56,12 +56,15 @@ export default class Voxel {
           size.maxZ = size.minZ != null ? size.minZ : size.minZ = voxel.position.z
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if (size.minX! > voxel.position.x) {
           size.minX = voxel.position.x
         }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if (size.minY! > voxel.position.y) {
           size.minY = voxel.position.y
         }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if (size.minZ! > voxel.position.z) {
           size.minZ = voxel.position.z
         }
@@ -77,11 +80,13 @@ export default class Voxel {
         }
       })
 
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
       return {
         x: (size.maxX! - size.minX!) + 1,
         y: (size.maxY! - size.minY!) + 1,
         z: (size.maxZ! - size.minZ!) + 1,
       }
+      /* eslint-enable @typescript-eslint/no-non-null-assertion */
     }
 
     this.fractionOfConnections = (voxels: Set<Voxel>) => {

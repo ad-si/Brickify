@@ -18,7 +18,7 @@ export const onLoadFile = function (files: FileList, feedbackTarget: HTMLElement
   }
 
   const file = files[0]
-  if (file == null || !file.name.toLowerCase()
+  if (!file.name.toLowerCase()
     .endsWith(".stl")) {
     bootbox.alert({
       title: "Your file does not have the right format!",
@@ -30,7 +30,7 @@ We are working on adding more file formats",
 
   return loadFile(feedbackTarget, file, spinnerOptions)
     .then(handleLoadedFile(feedbackTarget, file.name, spinnerOptions) as (value: ProgressEvent<FileReader>) => Promise<string>)
-    .catch((error: unknown) => {
+    .catch((error: unknown): undefined => {
       bootbox.alert({
         title: "Import failed",
         message:
@@ -41,10 +41,11 @@ We are working on adding more file formats",
       })
       feedbackTarget.innerHTML = errorString
       log.error(error)
+      return undefined
     })
 }
 
-var loadFile = function (feedbackTarget: HTMLElement, file: File, spinnerOptions: SpinnerOptions): Promise<ProgressEvent<FileReader>> {
+const loadFile = function (feedbackTarget: HTMLElement, file: File, spinnerOptions: SpinnerOptions): Promise<ProgressEvent<FileReader>> {
   feedbackTarget.innerHTML = readingString
   Spinner.start(feedbackTarget, spinnerOptions)
   const reader = new FileReader()
@@ -110,8 +111,8 @@ interface FileReaderLoadEvent extends ProgressEvent<FileReader> {
   target: FileReader & { result: ArrayBuffer };
 }
 
-var handleLoadedFile = (feedbackTarget: HTMLElement, filename: string, spinnerOptions: SpinnerOptions) => function (event: FileReaderLoadEvent): Promise<string> {
-  log.debug(`File ${filename} loaded, size: ${event.target.result.byteLength} bytes`)
+const handleLoadedFile = (feedbackTarget: HTMLElement, filename: string, spinnerOptions: SpinnerOptions) => function (event: FileReaderLoadEvent): Promise<string> {
+  log.debug(`File ${filename} loaded, size: ${String(event.target.result.byteLength)} bytes`)
   const fileContent = event.target.result
 
   return new Promise((resolve, reject) => {
@@ -139,7 +140,7 @@ var handleLoadedFile = (feedbackTarget: HTMLElement, filename: string, spinnerOp
     stlParserInstance.on("data", (data: { faces?: unknown[] }) => {
       // Only process if this is a valid parsed model object with faces
       // Skip raw buffer data or subsequent emissions
-      if (modelProcessed || !data?.faces || !Array.isArray(data.faces)) {
+      if (modelProcessed || !data.faces || !Array.isArray(data.faces)) {
         return
       }
 
@@ -163,7 +164,7 @@ var handleLoadedFile = (feedbackTarget: HTMLElement, filename: string, spinnerOp
           feedbackTarget.innerHTML = loadedString
           resolve(md5hash)
         })
-        .catch((error: unknown) => { reject(error) })
+        .catch((error: unknown) => { reject(error instanceof Error ? error : new Error(String(error))) })
     })
 
     // Explicitly start the stream flowing (needed for some stream polyfills)

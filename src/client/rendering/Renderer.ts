@@ -79,9 +79,9 @@ interface ImageRenderResult {
  */
 export default class Renderer {
   private pluginHooks: PluginHooks
-  private scene: Scene | null
-  private camera: PerspectiveCamera | null
-  private threeRenderer: WebGLRenderer | null
+  private scene!: Scene
+  private camera!: PerspectiveCamera
+  private threeRenderer!: WebGLRenderer
   private pipelineEnabled: boolean
   private useBigRendertargets: boolean
   private usePipelineSsao: boolean
@@ -97,8 +97,8 @@ export default class Renderer {
   private staticRendererWidth: number
   private staticRendererHeight: number
   private devicePixelRatio: number
-  private globalConfig: GlobalConfig | null
-  private controls: PointerControls | null
+  private globalConfig!: GlobalConfig
+  private controls!: PointerControls
 
   constructor (pluginHooks: PluginHooks, globalConfig: GlobalConfig, controls?: PointerControls) {
     this.renderToImage = this.renderToImage.bind(this)
@@ -111,9 +111,6 @@ export default class Renderer {
     this.getDefaultScene = this.getDefaultScene.bind(this)
     this.toggleRendering = this.toggleRendering.bind(this)
     this.pluginHooks = pluginHooks
-    this.scene = null
-    this.camera = null
-    this.threeRenderer = null
     this.pipelineEnabled = false
     this.useBigRendertargets = false
     this.usePipelineSsao = false
@@ -129,8 +126,6 @@ export default class Renderer {
     this.staticRendererWidth = 0
     this.staticRendererHeight = 0
     this.devicePixelRatio = 1
-    this.globalConfig = null
-    this.controls = null
     this.init(globalConfig, controls)
   }
 
@@ -144,7 +139,7 @@ export default class Renderer {
       return this.imageRenderQueries.push({
         resolve,
         reject,
-        camera: camera as PerspectiveCamera,
+        camera,
         resolution: renderTargetHelper.getNextValidTextureDimension(resolution),
       })
     })
@@ -154,7 +149,7 @@ export default class Renderer {
     this._updateSize()
 
     if (this.imageRenderQueries.length === 0) {
-      this._renderFrame(timestamp, this.camera!, null)
+      this._renderFrame(timestamp, this.camera, null)
     }
     else {
       this._renderImage(timestamp)
@@ -162,18 +157,19 @@ export default class Renderer {
 
     // call update hook
     this.pluginHooks.on3dUpdate(timestamp)
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     return this.animationRequestID = requestAnimationFrame(this.localRenderer)
   }
 
   // Renders all plugins
   _renderFrame (_timestamp: number, camera: PerspectiveCamera, renderTarget: WebGLRenderTarget | null = null): void {
     // Clear screen
-    this.threeRenderer!.setRenderTarget(renderTarget)
-    this.threeRenderer!.context.stencilMask(0xFF)
-    this.threeRenderer!.clear()
+    this.threeRenderer.setRenderTarget(renderTarget)
+    this.threeRenderer.context.stencilMask(0xFF)
+    this.threeRenderer.clear()
 
     // Render the default scene (plugins add objects in the init3d hook)
-    this.threeRenderer!.render(this.scene!, camera, renderTarget)
+    this.threeRenderer.render(this.scene, camera, renderTarget)
 
     // Allow for custom render passes
     if (this.pipelineEnabled) {
@@ -181,31 +177,36 @@ export default class Renderer {
       this._initializePipelineTarget()
 
       // Clear render target
-      this.threeRenderer!.setRenderTarget(this.pipelineRenderTarget!.renderTarget)
-      this.threeRenderer!.context.stencilMask(0xFF)
-      this.threeRenderer!.clear()
-      this.threeRenderer!.setRenderTarget(null)
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.threeRenderer.setRenderTarget(this.pipelineRenderTarget!.renderTarget)
+      this.threeRenderer.context.stencilMask(0xFF)
+      this.threeRenderer.clear()
+      this.threeRenderer.setRenderTarget(null)
 
       // let plugins render in our target
       this.pluginHooks.onPaint(
-        this.threeRenderer!,
+        this.threeRenderer,
         camera,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.pipelineRenderTarget!.renderTarget,
       )
 
       // Render our target to the screen
-      this.threeRenderer!.render(this.pipelineRenderTarget!.quadScene, this.camera!)
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.threeRenderer.render(this.pipelineRenderTarget!.quadScene, this.camera)
 
       if (this.usePipelineSsao) {
         // Take data from our target and render SSAO
         // data into gauss target
-        this.threeRenderer!.render(
-          this.ssaoTarget!.quadScene, this.camera!, this.ssaoBlurTarget!.renderTarget, true,
+        this.threeRenderer.render(
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          this.ssaoTarget!.quadScene, this.camera, this.ssaoBlurTarget!.renderTarget, true,
         )
 
         // Take the SSAO values and render a gaussed version on the screen
-        this.threeRenderer!.render(
-          this.ssaoBlurTarget!.quadScene, this.camera!,
+        this.threeRenderer.render(
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          this.ssaoBlurTarget!.quadScene, this.camera,
         )
       return
       }
@@ -214,7 +215,8 @@ export default class Renderer {
 
   _renderImage (timestamp: number): void {
     // render first query to image
-    const imageQuery = this.imageRenderQueries.shift()!
+    const imageQuery = this.imageRenderQueries.shift()
+    if (imageQuery == null) return
 
     // override render size if requested
     if (imageQuery.resolution != null) {
@@ -224,14 +226,14 @@ export default class Renderer {
     // create rendertarget
     if ((this.imageRenderTarget == null) ||
       !renderTargetHelper.renderTargetHasRightSize(
-        this.imageRenderTarget.renderTarget, this.threeRenderer!,
+        this.imageRenderTarget.renderTarget, this.threeRenderer,
       )) {
       if (this.imageRenderTarget != null) {
-        renderTargetHelper.deleteRenderTarget(this.imageRenderTarget, this.threeRenderer!)
+        renderTargetHelper.deleteRenderTarget(this.imageRenderTarget, this.threeRenderer)
       }
 
       this.imageRenderTarget = renderTargetHelper.createRenderTarget(
-        this.threeRenderer!,
+        this.threeRenderer,
         [],
         null,
         1.0,
@@ -255,7 +257,7 @@ export default class Renderer {
     const rt = this.imageRenderTarget.renderTarget as WebGLRenderTarget & { format: number }
     rt.format = rt.texture.format
 
-    this.threeRenderer!.readRenderTargetPixels(
+    this.threeRenderer.readRenderTargetPixels(
       this.imageRenderTarget.renderTarget, 0, 0,
       width, height, pixels,
     )
@@ -279,7 +281,7 @@ export default class Renderer {
   _initializePipelineTarget (): void {
     if ((this.pipelineRenderTarget == null) || this.pipelineRenderTarget.dirty ||
     !renderTargetHelper.renderTargetHasRightSize(
-      this.pipelineRenderTarget.renderTarget, this.threeRenderer!,
+      this.pipelineRenderTarget.renderTarget, this.threeRenderer,
     )) {
       // Create the render target that renders everything anti-aliased to the screen
       const shaderParts = []
@@ -288,11 +290,11 @@ export default class Renderer {
       }
 
       if (this.pipelineRenderTarget != null) {
-        renderTargetHelper.deleteRenderTarget(this.pipelineRenderTarget, this.threeRenderer!)
+        renderTargetHelper.deleteRenderTarget(this.pipelineRenderTarget, this.threeRenderer)
       }
 
       this.pipelineRenderTarget = renderTargetHelper.createRenderTarget(
-        this.threeRenderer!,
+        this.threeRenderer,
         shaderParts,
         null,
         1.0,
@@ -306,10 +308,10 @@ export default class Renderer {
 
         // Delete existing Targets
         if (this.ssaoTarget != null) {
-          renderTargetHelper.deleteRenderTarget(this.ssaoTarget, this.threeRenderer!)
+          renderTargetHelper.deleteRenderTarget(this.ssaoTarget, this.threeRenderer)
         }
         if (this.ssaoBlurTarget != null) {
-          renderTargetHelper.deleteRenderTarget(this.ssaoBlurTarget, this.threeRenderer!)
+          renderTargetHelper.deleteRenderTarget(this.ssaoBlurTarget, this.threeRenderer)
         }
 
         // Clone the pipeline render target:
@@ -323,7 +325,7 @@ export default class Renderer {
 
         // Create a rendertarget that applies a gauss filter on everything
         this.ssaoBlurTarget = renderTargetHelper.createRenderTarget(
-          this.threeRenderer!,
+          this.threeRenderer,
           [new SsaoBlurPart()],
           {},
           1.0,
@@ -382,11 +384,11 @@ export default class Renderer {
   }
 
   addToScene (node: Object3D): void {
-    this.scene!.add(node)
+    this.scene.add(node)
   }
 
   getDomElement (): HTMLCanvasElement {
-    return this.threeRenderer!.domElement
+    return this.threeRenderer.domElement
   }
 
   getCamera (): PerspectiveCamera | null {
@@ -395,18 +397,18 @@ export default class Renderer {
 
   windowResizeHandler (): void {
     if (!this.staticRendererSize) {
-      this.camera!.aspect = this.size().width / this.size().height
-      this.camera!.updateProjectionMatrix()
+      this.camera.aspect = this.size().width / this.size().height
+      this.camera.updateProjectionMatrix()
       this._updateSize(true)
     }
 
-    this.threeRenderer!.render(this.scene!, this.camera!)
+    this.threeRenderer.render(this.scene, this.camera)
   }
 
   zoomToNode (threeNode: Object3D): void {
     const boundingSphere = threeHelper.getBoundingSphere(threeNode)
     // Zooms out/in the camera so that the object is fully visible
-    threeHelper.zoomToBoundingSphere(this.camera!, this.scene!, this.controls, boundingSphere)
+    threeHelper.zoomToBoundingSphere(this.camera, this.scene, this.controls, boundingSphere)
   }
 
   init (globalConfig: GlobalConfig, controls?: PointerControls): number {
@@ -417,6 +419,7 @@ export default class Renderer {
     this._setupCamera(this.globalConfig)
     this._setupControls(this.globalConfig, controls)
 
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     return this.animationRequestID = requestAnimationFrame(this.localRenderer)
   }
 
@@ -474,8 +477,8 @@ Rendering will be (partly) broken",
     const devicePixelRatio = window.devicePixelRatio || 1
     if (forceUpdate || (devicePixelRatio !== this.devicePixelRatio)) {
       this.devicePixelRatio = devicePixelRatio
-      this.threeRenderer!.setPixelRatio(devicePixelRatio)
-      this.threeRenderer!.setSize(this.size().width, this.size().height)
+      this.threeRenderer.setPixelRatio(devicePixelRatio)
+      this.threeRenderer.setSize(this.size().width, this.size().height)
     }
   }
 
@@ -517,10 +520,11 @@ Rendering will be (partly) broken",
   }
 
   initControls (): void {
-    this.controls!.control(this.camera!)
-      .with(this.threeRenderer!.domElement)
+    this.controls.control(this.camera)
+      .with(this.threeRenderer.domElement)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   getControls (): PointerControls | null {
     return this.controls
   }
@@ -544,7 +548,7 @@ Rendering will be (partly) broken",
 
   // Creates a scene with default light and rotation settings
   getDefaultScene (): Scene {
-    const scene = this._setupScene(this.globalConfig!)
+    const scene = this._setupScene(this.globalConfig)
     this._setupLighting(scene)
     return scene
   }
@@ -553,11 +557,12 @@ Rendering will be (partly) broken",
     if (this.animationRequestID != null) {
       cancelAnimationFrame(this.animationRequestID)
       this.animationRequestID = null
-      return this.controls!.config.enabled = false
+      return this.controls.config.enabled = false
     }
     else {
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.animationRequestID = requestAnimationFrame(this.localRenderer)
-      return this.controls!.config.enabled = true
+      return this.controls.config.enabled = true
     }
   }
 }

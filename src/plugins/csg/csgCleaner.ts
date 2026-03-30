@@ -21,7 +21,7 @@ export default function clean (geometry: THREE.Geometry | null, options: CleanOp
   if (options.split) {
     d = new Date()
     geometries = splitGeometry(geometry)
-    log.debug(`Model splitting took ${+new Date() - +d}ms`)
+    log.debug(`Model splitting took ${String(+new Date() - +d)}ms`)
   }
   else {
     log.debug("(Skipping step model splitting)")
@@ -31,7 +31,7 @@ export default function clean (geometry: THREE.Geometry | null, options: CleanOp
   if (options.filterSmallGeometries) {
     d = new Date()
     geometries = filterSmallGeometries(geometries, options.minimalPrintVolume || 0)
-    log.debug(`Filtering small geometries took ${+new Date() - +d}ms`)
+    log.debug(`Filtering small geometries took ${String(+new Date() - +d)}ms`)
   }
   else {
     log.debug("(Skipping step filtering small geometries)")
@@ -72,16 +72,12 @@ function forAllFaces (threeGeometry: THREE.Geometry, visitor: (a: THREE.Vector3,
     vertices,
   } = threeGeometry
 
-  return (() => {
-    const result: void[] = []
-    for (const face of Array.from(faces)) {
-      const a = vertices[face.a]
-      const b = vertices[face.b]
-      const c = vertices[face.c]
-      result.push(visitor(a, b, c))
-    }
-    return result
-  })()
+  for (const face of Array.from(faces)) {
+    const a = vertices[face.a]
+    const b = vertices[face.b]
+    const c = vertices[face.c]
+    visitor(a, b, c)
+  }
 }
 
 function splitGeometry (geometry: THREE.Geometry): THREE.Geometry[] {
@@ -185,17 +181,13 @@ function compactClasses (equivalenceClasses: EquivalenceClass[]) {
     faceIndices,
   } = equivalenceClasses[0]
 
-  return (() => {
-    const result: void[] = []
-    for (let i = 1, end = equivalenceClasses.length - 1; i <= end; i++) {
-      const equivalenceClass = equivalenceClasses[i]
-      equivalenceClass.vertexIndices.forEach((vertex: number) => vertexIndices.add(vertex))
-      equivalenceClass.faceIndices.forEach((faceIndex: number) => faceIndices.add(faceIndex))
+  for (let i = 1, end = equivalenceClasses.length - 1; i <= end; i++) {
+    const equivalenceClass = equivalenceClasses[i]
+    equivalenceClass.vertexIndices.forEach((vertex: number) => vertexIndices.add(vertex))
+    equivalenceClass.faceIndices.forEach((faceIndex: number) => faceIndices.add(faceIndex))
 
-      // clear old class
-      equivalenceClass.vertexIndices.clear()
-      result.push(equivalenceClass.faceIndices.clear())
-    }
-    return result
-  })()
+    // clear old class
+    equivalenceClass.vertexIndices.clear()
+    equivalenceClass.faceIndices.clear()
+  }
 }

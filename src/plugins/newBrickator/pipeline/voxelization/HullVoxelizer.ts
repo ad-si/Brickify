@@ -66,19 +66,18 @@ export default class Voxelizer {
   }
 
   voxelize (model: Model, options: VoxelizeOptions, progressCallback: ProgressCallback): Promise<{ grid: Grid; gridPOJO: unknown }> {
-    if (options == null) {
-      options = {}
-    }
     this._addDefaults(options)
 
     return new Promise((resolve, reject) => {
-      return this.setupGrid(model, options)
+      void this.setupGrid(model, options)
         .then((voxelGrid: Grid) => {
 
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const lineStepSize = voxelGrid.heightRatio / options.accuracy!
 
           const progressAndFinishedCallback = (message: WorkerMessage) => {
             if (message.state === "progress") {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               progressCallback(message.progress!)
       return
             }
@@ -114,15 +113,15 @@ export default class Voxelizer {
                   const handleMessage = (e: unknown) => {
                     const event = e as { data: WorkerMessage }
                     const message = event.data
-                    if (!message || !message.state) return
                     if (message.state === "progress") {
                       progressAndFinishedCallback(message)
                     }
                     else if (message.state === "finished") {
                       cleanup()
-                      resolveWorker(progressAndFinishedCallback(message))
+                      progressAndFinishedCallback(message)
+                      resolveWorker()
                     }
-                    else if (message.state === "error") {
+                    else {
                       cleanup()
                       rejectWorker(new Error(message.error || "Worker error"))
                     }
@@ -145,7 +144,7 @@ export default class Voxelizer {
                 })
               }))
         })
-        .catch((error: unknown) => { reject(error) })
+        .catch((error: unknown) => { reject(error instanceof Error ? error : new Error(String(error))) })
     })
   }
 
@@ -171,6 +170,7 @@ export default class Voxelizer {
             y: coordinates[i + 1],
             z: coordinates[i + 2],
           }
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const coordinate = this.voxelGrid!.mapModelToVoxelSpace(position)
           voxelSpaceCoordinates[i] = coordinate.x
           voxelSpaceCoordinates[i + 1] = coordinate.y
@@ -181,6 +181,7 @@ export default class Voxelizer {
         const directions: number[] = []
         for (i = 2, end1 = normals.length; i < end1; i += 3) {
           const z = normals[i]
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           directions.push(this._getTolerantDirection(z, options.zTolerance!))
         }
 
@@ -238,6 +239,7 @@ export default class Voxelizer {
     return this.voxelGrid
       .setUpForModel(model, options as any)
       .then(() => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return this.voxelGrid!
       })
   }

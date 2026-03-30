@@ -45,6 +45,7 @@ export default class PointEventHandler {
 
     // perform brush action
     this.isBrushing = true
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     __guardMethod__(this.brushUi.getSelectedBrush(), "onBrushDown", (o: Brush) => { o.onBrushDown!(event, this.sceneManager.selectedNode as Node) })
     return true
   }
@@ -83,6 +84,7 @@ export default class PointEventHandler {
 
     // end brush action
     this.isBrushing = false
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     __guardMethod__(this.brushUi.getSelectedBrush(), "onBrushUp", (o: Brush) => { o.onBrushUp!(event, this.sceneManager.selectedNode as Node) })
 
     this._untoggleBrush()
@@ -95,6 +97,7 @@ export default class PointEventHandler {
     }
 
     this.isBrushing = false
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     __guardMethod__(this.brushUi.getSelectedBrush(), "onBrushCancel", (o: Brush) => { o.onBrushCancel!(
       event, this.sceneManager.selectedNode as Node,
     ) })
@@ -122,9 +125,9 @@ export default class PointEventHandler {
   }
 }
 
-function __guardMethod__ <T extends object, K extends keyof T>(
+function __guardMethod__ <T extends object>(
   obj: T | null | undefined,
-  methodName: K,
+  methodName: keyof T,
   transform: (obj: T) => void
 ): void {
   if (typeof obj !== "undefined" && obj !== null && typeof obj[methodName] === "function") {

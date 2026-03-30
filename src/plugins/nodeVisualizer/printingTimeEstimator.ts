@@ -38,7 +38,7 @@ interface GridSpacing {
   z: number
 }
 
-const forAllFaces = function (threeGeometry: ThreeGeometry, visitor: (a: Vertex, b: Vertex, c: Vertex) => void): void[] {
+const forAllFaces = function (threeGeometry: ThreeGeometry, visitor: (a: Vertex, b: Vertex, c: Vertex) => void): void {
   const {
     faces,
   } = threeGeometry
@@ -46,16 +46,12 @@ const forAllFaces = function (threeGeometry: ThreeGeometry, visitor: (a: Vertex,
     vertices,
   } = threeGeometry
 
-  return (() => {
-    const result: void[] = []
-    for (const face of Array.from(faces)) {
-      const a = vertices[face.a]
-      const b = vertices[face.b]
-      const c = vertices[face.c]
-      result.push(visitor(a, b, c))
-    }
-    return result
-  })()
+  for (const face of Array.from(faces)) {
+    const a = vertices[face.a]
+    const b = vertices[face.b]
+    const c = vertices[face.c]
+    visitor(a, b, c)
+  }
 }
 
 /*

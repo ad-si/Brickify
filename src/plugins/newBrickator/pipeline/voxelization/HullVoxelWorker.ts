@@ -77,9 +77,8 @@ const HullVoxelWorker: HullVoxelWorkerType = {
     this.voxelRoundingThreshold = voxelRoundingThreshold
     const grid: VoxelGrid = []
     this._resetProgress()
-    const self = this
-    this._forEachPolygon(model, function (p0: Point3D, p1: Point3D, p2: Point3D, direction: number, progress: number) {
-      self._voxelizePolygon(
+    this._forEachPolygon(model, (p0: Point3D, p1: Point3D, p2: Point3D, direction: number, progress: number) => {
+      this._voxelizePolygon(
         p0,
         p1,
         p2,
@@ -87,7 +86,7 @@ const HullVoxelWorker: HullVoxelWorkerType = {
         lineStepSize,
         grid,
       )
-      self._postProgress(progress, progressCallback)
+      this._postProgress(progress, progressCallback)
     })
 
     progressCallback({

@@ -124,7 +124,7 @@ export function startOverlay (target?: HTMLElement | null, options: SpinnerOptio
     const offset = $target.offset()
     const top = (offset?.top ?? 0) + (($target.height() ?? 0) / 2)
     const left = (offset?.left ?? 0) + (($target.width() ?? 0) / 2)
-    overlay.style.cssText = `top: ${top}px; left: ${left}px;`
+    overlay.style.cssText = `top: ${String(top)}px; left: ${String(left)}px;`
     document.body.appendChild(overlay)
     spinnerState = {spin, count: 0, overlay}
     spinners.set(target, spinnerState)

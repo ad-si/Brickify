@@ -68,13 +68,13 @@ export default class VoxelUnion {
     }
 
     const boxGeometryBsp = new ThreeBSP(boxGeometry)
-    log.debug(`Geometrizer: voxel geometry took ${+new Date() - +d}ms`)
+    log.debug(`Geometrizer: voxel geometry took ${String(+new Date() - +d)}ms`)
 
     if (options.addStuds) {
       d = new Date()
       const bspWithStuds = this._addStuds(
         boxGeometryBsp, options, voxelsToBeGeometrized, this.grid)
-      log.debug(`Geometrizer: stud geometry took ${+new Date() - +d}ms`)
+      log.debug(`Geometrizer: stud geometry took ${String(+new Date() - +d)}ms`)
       return bspWithStuds
     }
 
@@ -117,8 +117,9 @@ export default class VoxelUnion {
 
         // add faces clockwise, because the baseplate "looks down"
         // (we look at it from inside the model)
-        geo.faces.push(new THREE.Face3(v.points![0], v.points![1], v.points![3]))
-        geo.faces.push(new THREE.Face3(v.points![3], v.points![1], v.points![2]))
+        const pts = v.points as number[]
+        geo.faces.push(new THREE.Face3(pts[0], pts[1], pts[3]))
+        geo.faces.push(new THREE.Face3(pts[3], pts[1], pts[2]))
       }
 
       // check if there are 4 neighbors in the same z-layer
@@ -133,45 +134,46 @@ export default class VoxelUnion {
         this._createGeoPoints(x, y, z, s, geo)
         // create points for the voxel baseplate above this voxel
         upperIndices = this._createGeoPoints(x, y, z + 1, s, geo)
+        const pts = v.points as number[]
 
         // create a sideplate if there is no voxel at this side
         // +x direction
         if (!s.zLayers[z][x + 1][y].voxel) {
           geo.faces.push(new THREE.Face3(
-            upperIndices[3], upperIndices[0], v.points![0]),
+            upperIndices[3], upperIndices[0], pts[0]),
           )
           geo.faces.push(new THREE.Face3(
-            v.points![0], v.points![3], upperIndices[3]),
+            pts[0], pts[3], upperIndices[3]),
           )
         }
 
         // -x direction
         if (!s.zLayers[z][x - 1][y].voxel) {
           geo.faces.push(new THREE.Face3(
-            upperIndices[1], upperIndices[2], v.points![2]),
+            upperIndices[1], upperIndices[2], pts[2]),
           )
           geo.faces.push(new THREE.Face3(
-            v.points![2], v.points![1], upperIndices[1]),
+            pts[2], pts[1], upperIndices[1]),
           )
         }
 
         // +y direction
         if (!s.zLayers[z][x][y + 1].voxel) {
           geo.faces.push(new THREE.Face3(
-            upperIndices[2], upperIndices[3], v.points![3]),
+            upperIndices[2], upperIndices[3], pts[3]),
           )
           geo.faces.push(new THREE.Face3(
-            v.points![3], v.points![2], upperIndices[2]),
+            pts[3], pts[2], upperIndices[2]),
           )
         }
 
         // -y direction
         if (!s.zLayers[z][x][y - 1].voxel) {
           geo.faces.push(new THREE.Face3(
-            upperIndices[0], upperIndices[1], v.points![0]),
+            upperIndices[0], upperIndices[1], pts[0]),
           )
           geo.faces.push(new THREE.Face3(
-            v.points![1], v.points![0], upperIndices[1]),
+            pts[1], pts[0], upperIndices[1]),
           )
         }
       }
@@ -226,9 +228,11 @@ export default class VoxelUnion {
       s.maxZ = Math.max(v.z, s.maxZ)
 
       // initialize structure
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (s.zLayers[v.z] == null) {
         s.zLayers[v.z] = []
       }
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (s.zLayers[v.z][v.x] == null) {
         s.zLayers[v.z][v.x] = []
       }
@@ -247,13 +251,17 @@ export default class VoxelUnion {
     for (let z = s.minZ - 1, end = s.maxZ + 1; z <= end; z++) {
       for (let x = s.minX - 1, end1 = s.maxX + 1; x <= end1; x++) {
         for (let y = s.minY - 1, end2 = s.maxY + 1; y <= end2; y++) {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           if (__guard__(s.zLayers[z] != null ? s.zLayers[z][x] : undefined, (x1: VoxelData[]) => x1[y]) == null) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             if (s.zLayers[z] == null) {
               s.zLayers[z] = []
             }
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             if (s.zLayers[z][x] == null) {
               s.zLayers[z][x] = []
             }
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             if (s.zLayers[z][x][y] == null) {
               s.zLayers[z][x][y] = {
                 points: null,
@@ -302,14 +310,17 @@ export default class VoxelUnion {
     // x----x----x----x
 
     // p0
-    if (structure.zLayers[z][x + 1][y].points != null) {
-      p0i = structure.zLayers[z][x + 1][y].points![1]
+    const vd_xp1_y = structure.zLayers[z][x + 1][y]
+    const vd_xp1_ym1 = structure.zLayers[z][x + 1][y - 1]
+    const vd_x_ym1 = structure.zLayers[z][x][y - 1]
+    if (vd_xp1_y.points != null) {
+      p0i = vd_xp1_y.points[1]
     }
-    else if (structure.zLayers[z][x + 1][y - 1].points != null) {
-      p0i = structure.zLayers[z][x + 1][y - 1].points![2]
+    else if (vd_xp1_ym1.points != null) {
+      p0i = vd_xp1_ym1.points[2]
     }
-    else if (structure.zLayers[z][x][y - 1].points != null) {
-      p0i = structure.zLayers[z][x][y - 1].points![3]
+    else if (vd_x_ym1.points != null) {
+      p0i = vd_x_ym1.points[3]
     }
     else {
       // this point did not exist, therefore create it
@@ -323,14 +334,16 @@ export default class VoxelUnion {
     }
 
     // p1
-    if (structure.zLayers[z][x][y - 1].points != null) {
-      p1i = structure.zLayers[z][x][y - 1].points![2]
+    const vd_xm1_ym1 = structure.zLayers[z][x - 1][y - 1]
+    const vd_xm1_y = structure.zLayers[z][x - 1][y]
+    if (vd_x_ym1.points != null) {
+      p1i = vd_x_ym1.points[2]
     }
-    else if (structure.zLayers[z][x - 1][y - 1].points != null) {
-      p1i = structure.zLayers[z][x - 1][y - 1].points![3]
+    else if (vd_xm1_ym1.points != null) {
+      p1i = vd_xm1_ym1.points[3]
     }
-    else if (structure.zLayers[z][x - 1][y].points != null) {
-      p1i = structure.zLayers[z][x - 1][y].points![0]
+    else if (vd_xm1_y.points != null) {
+      p1i = vd_xm1_y.points[0]
     }
     else {
       const p1 = {
@@ -343,14 +356,16 @@ export default class VoxelUnion {
     }
 
     // p2
-    if (structure.zLayers[z][x - 1][y].points != null) {
-      p2i = structure.zLayers[z][x - 1][y].points![3]
+    const vd_xm1_yp1 = structure.zLayers[z][x - 1][y + 1]
+    const vd_x_yp1 = structure.zLayers[z][x][y + 1]
+    if (vd_xm1_y.points != null) {
+      p2i = vd_xm1_y.points[3]
     }
-    else if (structure.zLayers[z][x - 1][y + 1].points != null) {
-      p2i = structure.zLayers[z][x - 1][y + 1].points![0]
+    else if (vd_xm1_yp1.points != null) {
+      p2i = vd_xm1_yp1.points[0]
     }
-    else if (structure.zLayers[z][x][y + 1].points != null) {
-      p2i = structure.zLayers[z][x][y + 1].points![1]
+    else if (vd_x_yp1.points != null) {
+      p2i = vd_x_yp1.points[1]
     }
     else {
       const p2 = {
@@ -363,14 +378,15 @@ export default class VoxelUnion {
     }
 
     // p3
-    if (structure.zLayers[z][x][y + 1].points != null) {
-      p3i = structure.zLayers[z][x][y + 1].points![0]
+    const vd_xp1_yp1 = structure.zLayers[z][x + 1][y + 1]
+    if (vd_x_yp1.points != null) {
+      p3i = vd_x_yp1.points[0]
     }
-    else if (structure.zLayers[z][x + 1][y + 1].points != null) {
-      p3i = structure.zLayers[z][x + 1][y + 1].points![1]
+    else if (vd_xp1_yp1.points != null) {
+      p3i = vd_xp1_yp1.points[1]
     }
-    else if (structure.zLayers[z][x + 1][y].points != null) {
-      p3i = structure.zLayers[z][x + 1][y].points![2]
+    else if (vd_xp1_y.points != null) {
+      p3i = vd_xp1_y.points[2]
     }
     else {
       const p3 = {
@@ -391,8 +407,11 @@ export default class VoxelUnion {
    * adds studs on top, subtracts studs from below
    */
   _addStuds (boxGeometry: ThreeBSP, options: VoxelUnionOptions, voxelsToBeGeometrized: VoxelInput[], grid: Grid): ThreeBSP {
+    if (options.studSize == null || options.holeSize == null) {
+      throw new Error("studSize and holeSize are required for addStuds")
+    }
     const studGeometry = this._createStudGeometry(
-      this.grid.spacing, options.studSize!, options.holeSize!,
+      this.grid.spacing, options.studSize, options.holeSize,
     )
     let unionBsp = boxGeometry
 

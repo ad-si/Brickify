@@ -22,7 +22,7 @@ interface BrickGeometries {
  */
 export default class BrickObject extends THREE.Object3D {
   disposableResource: DisposableResource | null
-  materials: BrickMaterials | null
+  materials!: BrickMaterials
   areStudsVisible: boolean
   fidelity: number
   brick: Brick | null
@@ -85,14 +85,17 @@ export default class BrickObject extends THREE.Object3D {
 
   setGray (isGray: boolean): Material {
     if (isGray) {
-      ;(this.children[0] as Mesh).material = this.materials!.gray!
-      ;(this.children[1] as Mesh).material = this.materials!.grayStuds!
-      return (this.children[2] as Mesh).material = this.materials!.grayStuds!
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      ;(this.children[0] as Mesh).material = this.materials.gray!
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      ;(this.children[1] as Mesh).material = this.materials.grayStuds!
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return (this.children[2] as Mesh).material = this.materials.grayStuds!
     }
     else {
-      ;(this.children[0] as Mesh).material = this.materials!.color
-      ;(this.children[1] as Mesh).material = this.materials!.colorStuds
-      return (this.children[2] as Mesh).material = this.materials!.colorStuds
+      ;(this.children[0] as Mesh).material = this.materials.color
+      ;(this.children[1] as Mesh).material = this.materials.colorStuds
+      return (this.children[2] as Mesh).material = this.materials.colorStuds
     }
   }
 
@@ -124,7 +127,8 @@ export default class BrickObject extends THREE.Object3D {
       this.disposableResource = null
 
       // Clear references
-      this.materials = null
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(this as any).materials = null
       this.brick = null
     }
   }

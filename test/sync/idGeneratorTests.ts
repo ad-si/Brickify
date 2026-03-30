@@ -9,7 +9,8 @@ describe("id generator tests", () => {
 
   it("should generate and validate according to the same pattern", () => {
     const id = idGenerator.generate()
-    return expect(idGenerator.check(id!)).to.be.ok
+    if (id == null) throw new Error("id should not be null")
+    return expect(idGenerator.check(id)).to.be.ok
   })
 
   it("should generate ids of the correct length", () => {

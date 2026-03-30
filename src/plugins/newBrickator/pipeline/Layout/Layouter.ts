@@ -17,9 +17,6 @@ interface BricksSet extends Set<Brick> {
  */
 
 export default class Layouter {
-  constructor () {
-  }
-
   // These methods are meant to be overridden in subclasses
   protected _isBrickLayouter (): boolean {
     return false
@@ -52,8 +49,11 @@ export default class Layouter {
     let numTotalInitialBricks = 0
 
     if (bricksToLayout == null) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       bricksToLayout = grid!.getAllBricks() as BricksSet
+      /* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/unbound-method */
       bricksToLayout.chooseRandomBrick = grid!.chooseRandomBrick
+      /* eslint-enable @typescript-eslint/no-non-null-assertion, @typescript-eslint/unbound-method */
     }
 
     numTotalInitialBricks += bricksToLayout.size
@@ -63,6 +63,7 @@ export default class Layouter {
     }
 
     MAINLOOP: // ;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while (true) {
       const brick = this._chooseRandomBrick(bricksToLayout)
       if (brick == null) {
@@ -83,8 +84,8 @@ export default class Layouter {
       if (!merged) {
         numRandomChoicesWithoutMerge++
         if (numRandomChoicesWithoutMerge >= maxNumRandomChoicesWithoutMerge) {
-          log.debug(`\trandomChoices ${numRandomChoices} \
-withoutMerge ${numRandomChoicesWithoutMerge}`,
+          log.debug(`\trandomChoices ${String(numRandomChoices)} \
+withoutMerge ${String(numRandomChoicesWithoutMerge)}`,
           )
           // Done with layout
           break
@@ -108,6 +109,7 @@ withoutMerge ${numRandomChoicesWithoutMerge}`,
           }
           const neighborIterator = neighbors.values()
           // .. unless all neighbors are already bricks
+          // eslint-disable-next-line no-cond-assign
           while (neighbor = neighborIterator.next().value) {
             if (neighbor.getSize().z === 1) {
               const newBricks = brick.splitUp()
@@ -137,9 +139,11 @@ withoutMerge ${numRandomChoicesWithoutMerge}`,
 
     const iterator = setOfBricks.entries()
     let result = iterator.next()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     let brick = result.value![0]
     while (rnd > 0) {
       result = iterator.next()
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       brick = result.value![0]
       rnd--
     }
@@ -168,6 +172,7 @@ withoutMerge ${numRandomChoicesWithoutMerge}`,
       const neighborsToMergeWith = mergeableNeighbors[mergeIndex]
 
       this._mergeBricksAndUpdateGraphConnections(brick,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         neighborsToMergeWith!, bricksToLayout)
 
       if (!brick.isValid()) {

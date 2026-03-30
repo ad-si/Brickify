@@ -59,7 +59,7 @@ export default class CsgExtractor {
 
     let d = new Date()
     const gridAnalysis = this._analyzeGrid(grid)
-    log.debug(`Grid analysis took ${+new Date() - +d}ms`)
+    log.debug(`Grid analysis took ${String(+new Date() - +d)}ms`)
 
     if (gridAnalysis.everythingBricks) {
       log.debug("Everything is made out of bricks. Skipped CSG.")
@@ -81,7 +81,7 @@ export default class CsgExtractor {
     d = new Date()
     const voxunion = new VoxelUnion(grid as any)
     const voxelHull = voxunion.run(gridAnalysis.legoVoxels, options)
-    log.debug(`Voxel Geometrizer took ${+new Date() - +d}ms`)
+    log.debug(`Voxel Geometrizer took ${String(+new Date() - +d)}ms`)
 
     const extraction = this._extractPrintGeometry(
       options.modelBsp as any,
@@ -151,8 +151,9 @@ export default class CsgExtractor {
     let d: Date
     if (!modelBsp) {
       d = new Date()
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       modelBsp = new ThreeBSP(originalModel!)
-      log.debug(`ThreeBsp generation took ${+new Date() - +d}ms`)
+      log.debug(`ThreeBsp generation took ${String(+new Date() - +d)}ms`)
     }
     else {
       log.debug("ThreeBSP already exists. Skipped ThreeBSP generation.")
@@ -160,7 +161,7 @@ export default class CsgExtractor {
 
     d = new Date()
     const printBsp = modelBsp.subtract(voxelHull)
-    log.debug(`Print geometry took ${+new Date() - +d}ms`)
+    log.debug(`Print geometry took ${String(+new Date() - +d)}ms`)
 
     return {
       modelBsp,

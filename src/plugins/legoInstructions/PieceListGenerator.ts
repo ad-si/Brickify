@@ -93,11 +93,10 @@ export function getHtml (list: BrickType[], caption: boolean = true): string {
 
     html +=
       "<tr>" +
-      `<td>${piece.size.x} x ${piece.size.y}</td>` +
+      `<td>${String(piece.size.x)} x ${String(piece.size.y)}</td>` +
       `<td>${type}</td>` +
-      `<td>${piece.count}x</td>` +
-      '<td><img src="img/partList/partList-' + (piece.sizeIndex + 1) +
-      '.png" height="40px"></td>' +
+      `<td>${String(piece.count)}x</td>` +
+      `<td><img src="img/partList/partList-${String(piece.sizeIndex + 1)}.png" height="40px"></td>` +
       "</tr>"
   }
 

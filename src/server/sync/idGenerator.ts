@@ -6,7 +6,7 @@
 
 const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-const pattern = (length: number): RegExp => new RegExp(`^[${chars}]{${length}}$`)
+const pattern = (length: number): RegExp => new RegExp(`^[${chars}]{${String(length)}}$`)
 
 const acceptAllFilter = (): boolean => true
 

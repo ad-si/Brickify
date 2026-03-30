@@ -106,6 +106,7 @@ export default class BrickLayouter extends Layouter {
 
     // Find neighbor voxels, noMerge if any is empty
     const voxelIter = voxels.values()
+    // eslint-disable-next-line no-cond-assign
     while (voxel = voxelIter.next().value as unknown as VoxelLike | undefined) {
       mVoxel = voxel.neighbors[dir]
       if (mVoxel == null) {
@@ -120,8 +121,9 @@ export default class BrickLayouter extends Layouter {
     // noMerge if any not present
     // noMerge if any brick not 1x1x1
     let mergeVoxelIter = mergeVoxels.values()
+    // eslint-disable-next-line no-cond-assign
     while (mVoxel = mergeVoxelIter.next().value) {
-      const mBrick = mVoxel?.brick
+      const mBrick = mVoxel.brick
       if (!mBrick || !mBrick.isSize(1, 1, 1)) {
         return null
       }
@@ -141,8 +143,9 @@ export default class BrickLayouter extends Layouter {
     // This is necessary for the 2 brick steps of larger bricks
     const mergeVoxels2 = new Set<VoxelLike>()
     mergeVoxelIter = mergeVoxels.values()
+    // eslint-disable-next-line no-cond-assign
     while (mVoxel = mergeVoxelIter.next().value) {
-      mVoxel2 = mVoxel.neighbors?.[dir]
+      mVoxel2 = mVoxel.neighbors[dir]
       if (mVoxel2 == null) {
         return null
       }
@@ -150,8 +153,9 @@ export default class BrickLayouter extends Layouter {
     }
 
     const mergeVoxel2Iter = mergeVoxels2.values()
+    // eslint-disable-next-line no-cond-assign
     while (mVoxel2 = mergeVoxel2Iter.next().value) {
-      const mBrick2 = mVoxel2?.brick
+      const mBrick2 = mVoxel2.brick
       if (!mBrick2 || !mBrick2.isSize(1, 1, 1)) {
         return null
       }
@@ -202,7 +206,7 @@ export default class BrickLayouter extends Layouter {
     const largestConnections = numBricks.filter(element => element.num === maxBricks)
 
     const randomOfLargest = largestConnections[Random.next(largestConnections.length)]
-    return randomOfLargest?.index ?? 0
+    return randomOfLargest.index
   }
 
   // Assumes brick is 1x1x1

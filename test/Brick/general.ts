@@ -86,7 +86,7 @@ describe("Brick", () => {
     let grid = new Grid()
     let v0 = grid.setVoxel({x: 0, y: 0, z: 0})
 
-    grid.initializeBricks()
+    void grid.initializeBricks()
 
     let connectedBricks = (v0.brick as Brick).connectedBricks()
     expect(connectedBricks.size).to.equal(0)
@@ -95,7 +95,7 @@ describe("Brick", () => {
     v0 = grid.setVoxel({x: 0, y: 0, z: 0})
     grid.setVoxel({x: 0, y: 0, z: 1})
 
-    grid.initializeBricks()
+    void grid.initializeBricks()
 
     connectedBricks = (v0.brick as Brick).connectedBricks()
     expect(connectedBricks.size).to.equal(1)
@@ -105,7 +105,7 @@ describe("Brick", () => {
     const v1 = grid.setVoxel({x: 0, y: 0, z: 1})
     grid.setVoxel({x: 0, y: 0, z: 2})
 
-    grid.initializeBricks()
+    void grid.initializeBricks()
 
     connectedBricks = (v1.brick as Brick).connectedBricks()
     return expect(connectedBricks.size).to.equal(2)

@@ -11,9 +11,7 @@ interface DataPacket {
   data: Record<string, unknown>
 }
 
-interface PacketsMap {
-  [id: string]: DataPacket
-}
+type PacketsMap = Partial<Record<string, DataPacket>>
 
 let packets: PacketsMap = {}
 
@@ -57,8 +55,9 @@ export function get (id: string): Promise<DataPacket> {
 }
 
 export function put (packet: DataPacket): Promise<string> {
-  if (packets[packet.id] != null) {
-    packets[packet.id].data = packet.data
+  const existing = packets[packet.id]
+  if (existing != null) {
+    existing.data = packet.data
     return Promise.resolve(packet.id)
   }
   else {
@@ -68,7 +67,7 @@ export function put (packet: DataPacket): Promise<string> {
 
 export function delete_ (id: string): Promise<void> {
   if (packets[id] != null) {
-    delete packets[id]
+    Reflect.deleteProperty(packets, id)
     return Promise.resolve()
   }
   else {

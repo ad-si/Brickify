@@ -38,6 +38,7 @@ export default class VolumeFiller {
         return new Promise((resolve) => {
           const cb = (message: WorkerMessage) => {
             if (message.state === 'progress') {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               progressCallback(message.progress!)
             } else if (message.state === 'finished') {
               grid.fromPojo(message.data as Record<string, Record<string, Record<string, unknown>>>)
@@ -56,14 +57,14 @@ export default class VolumeFiller {
         const handleMessage = (e: unknown) => {
           const event = e as { data: WorkerMessage }
           const message = event.data
-          if (!message || !message.state) return
           if (message.state === 'progress') {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             progressCallback(message.progress!)
           } else if (message.state === 'finished') {
             cleanup()
             grid.fromPojo(message.data as Record<string, Record<string, Record<string, unknown>>>)
             resolve({ grid })
-          } else if (message.state === 'error') {
+          } else {
             cleanup()
             reject(new Error(message.error || "Worker error"))
           }

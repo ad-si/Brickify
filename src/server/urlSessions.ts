@@ -6,20 +6,20 @@ interface Session {
   [key: string]: unknown;
 }
 
-const sessions: Record<string, Session> = {}
-const shareLinks: Record<string, string> = {}
+const sessions: Partial<Record<string, Session>> = {}
+const shareLinks: Partial<Record<string, string>> = {}
 
 export function middleware (request: Request, response: Response, next: NextFunction) {
   // if in /app, do we have a share url?
   let sessionId: string
   if ((request.path === "/app") && (request.query.share != null)) {
-    sessionId = String(request.query.share)
+    sessionId = Array.isArray(request.query.share) ? (request.query.share[0] as string) : request.query.share as string
     resolveShare(sessionId, request, response, next)
       return
     // if in /app, do we have a url parameter that indicates a session?
   }
   else if ((request.path === "/app") && (request.query.s != null)) {
-    sessionId = String(request.query.s)
+    sessionId = Array.isArray(request.query.s) ? (request.query.s[0] as string) : request.query.s as string
     checkSession(sessionId, request, response, next)
       return
     // do we have a cookie that indicates a session?
@@ -38,7 +38,7 @@ export function middleware (request: Request, response: Response, next: NextFunc
 
 export function generateShareId (sid: string): string {
   // check if share id exists
-  for (const key of Object.keys(shareLinks || {})) {
+  for (const key of Object.keys(shareLinks)) {
     if (shareLinks[key] === sid) {
       return key
     }

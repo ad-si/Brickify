@@ -123,10 +123,10 @@ export default class NodeVisualizer {
 
   init (bundle: Bundle): JQuery | undefined {
     this.bundle = bundle
-    const cfg = (bundle && bundle.globalConfig) ? bundle.globalConfig : null
+    const cfg = bundle.globalConfig
     this.coloring = new Coloring(cfg)
 
-    const colors = (cfg && cfg.colors) ? cfg.colors : this.coloring.globalConfig.colors
+    const colors = cfg.colors
     this.objectColorMult = new THREE.Vector3(
       colors.objectColorMult,
       colors.objectColorMult,
@@ -180,7 +180,9 @@ export default class NodeVisualizer {
     RenderTargetHelper.renderTargetHasRightSize(
       this.brickSceneTarget.renderTarget, threeRenderer,
     ))) {
+      /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument */
       // bricks
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (this.brickSceneTarget != null) {
         RenderTargetHelper.deleteRenderTarget(this.brickSceneTarget as any, this.threeRenderer)
       }
@@ -193,6 +195,7 @@ export default class NodeVisualizer {
       )
 
       // object target
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (this.objectsSceneTarget != null) {
         RenderTargetHelper.deleteRenderTarget(this.objectsSceneTarget as any, this.threeRenderer)
       }
@@ -205,11 +208,13 @@ export default class NodeVisualizer {
       )
 
       // brick shadow target
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (this.brickShadowSceneTarget != null) {
         RenderTargetHelper.deleteRenderTarget(
           this.brickShadowSceneTarget as any, this.threeRenderer,
         )
       }
+      /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument */
 
       this.brickShadowSceneTarget = RenderTargetHelper.createRenderTarget(
         threeRenderer,
@@ -289,7 +294,7 @@ export default class NodeVisualizer {
     gl.disable(gl.STENCIL_TEST)
   }
 
-  setFidelity (fidelityLevel: number, availableLevels: string[]): void[] {
+  setFidelity (fidelityLevel: number, availableLevels: string[]): unknown {
     // Determine whether to use the pipeline or not
     if (fidelityLevel >= availableLevels.indexOf("PipelineLow")) {
       if (!this.usePipeline) {
@@ -336,6 +341,7 @@ export default class NodeVisualizer {
       this.fidelity = 0
     }
 
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return */
     return (() => {
       const result: any[] = []
       for (const nodeId in this.brickVisualizations) {
@@ -344,6 +350,7 @@ export default class NodeVisualizer {
       }
       return result as any
     })()
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return */
   }
 
   // called by newBrickator when an object's data structure is modified
@@ -376,7 +383,7 @@ export default class NodeVisualizer {
     // create visible node and zoom to it
     return this._getCachedData(node)
       .then((cachedData: CachedData) => {
-        cachedData.modelVisualization.createVisualization()
+        void cachedData.modelVisualization.createVisualization()
         return cachedData.modelVisualization.afterCreation()
           .then(() => {
             const solid = cachedData.modelVisualization.getSolid()
@@ -395,7 +402,7 @@ export default class NodeVisualizer {
     if (shadowNode) this.brickShadowRootNode.remove(shadowNode)
     const objectNode = threeHelper.find(node, this.objectsRootNode)
     if (objectNode) this.objectsRootNode.remove(objectNode)
-    return delete this.brickVisualizations[node.id]
+    return Reflect.deleteProperty(this.brickVisualizations, node.id)
   }
 
   onNodeSelect (selectedNode: Node): void {
@@ -461,6 +468,7 @@ export default class NodeVisualizer {
       modelThreeNode,
       brickVisualization,
       modelVisualization: new ModelVisualization(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
         this.bundle.globalConfig, node as any, modelThreeNode, this.coloring,
       ),
     }
@@ -511,31 +519,31 @@ export default class NodeVisualizer {
     cachedData.brickVisualization.updateVisualization()
     cachedData.brickVisualization.showVoxelAndBricks()
     cachedData.brickVisualization.setPossibleLegoBoxVisibility(true)
-    cachedData.modelVisualization.setShadowVisibility(false)
+    void cachedData.modelVisualization.setShadowVisibility(false)
   }
 
   _applyPrintBrushMode (cachedData: CachedData): void {
     cachedData.brickVisualization.updateVisualization()
     cachedData.brickVisualization.showVoxelAndBricks()
     cachedData.brickVisualization.setPossibleLegoBoxVisibility(false)
-    cachedData.modelVisualization.setShadowVisibility(true)
+    void cachedData.modelVisualization.setShadowVisibility(true)
   }
 
   _applyStabilityView (cachedData: CachedData): void {
     cachedData.stabilityViewEnabled  = true
 
-    this._showCsg(cachedData)
+    void this._showCsg(cachedData)
       .then(() => // change coloring to stability coloring
         cachedData.brickVisualization.setStabilityView(true))
 
-    cachedData.modelVisualization.setNodeVisibility(false)
+    void cachedData.modelVisualization.setNodeVisibility(false)
   }
 
-  _resetStabilityView (cachedData: CachedData): boolean | void {
+  _resetStabilityView (cachedData: CachedData): void {
     if (cachedData.stabilityViewEnabled) {
       cachedData.brickVisualization.setStabilityView(false)
       cachedData.brickVisualization.hideCsg()
-      cachedData.modelVisualization.setNodeVisibility(true)
+      void cachedData.modelVisualization.setNodeVisibility(true)
       cachedData.stabilityViewEnabled = false
     }
   }
@@ -545,16 +553,16 @@ export default class NodeVisualizer {
     cachedData.brickVisualization.setPossibleLegoBoxVisibility(false)
     cachedData.brickVisualization.setHighlightVoxelVisibility(false)
 
-    this._showCsg(cachedData)
+    void this._showCsg(cachedData)
 
-    cachedData.modelVisualization.setNodeVisibility(false)
+    void cachedData.modelVisualization.setNodeVisibility(false)
   }
 
   _resetBuildMode (cachedData: CachedData): void {
     cachedData.brickVisualization.setHighlightVoxelVisibility(true)
     cachedData.brickVisualization.hideCsg()
     cachedData.brickVisualization.showAllBrickLayers()
-    cachedData.modelVisualization.setNodeVisibility(true)
+    void cachedData.modelVisualization.setNodeVisibility(true)
   }
 
   // Returns the amount of LEGO-Layers that can be shown in build mode.
@@ -583,6 +591,7 @@ export default class NodeVisualizer {
 
   _updatePrintTime (csg: THREE.BufferGeometry[] | null): void {
     if (csg != null) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
       let time = PrintingTimeEstimator.getPrintingTimeEstimate(csg as any)
       time = Math.round(time)
       if (this.timeEstimate != null) {
@@ -597,6 +606,7 @@ export default class NodeVisualizer {
   }
 
   _updateQuickPrintTime (voxels: unknown[], spacing: { x: number; y: number; z: number }): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
     let time = PrintingTimeEstimator.getPrintingTimeEstimateForVoxels(voxels as any, spacing)
     time = Math.round(time)
     if (this.timeEstimate != null) {
@@ -651,20 +661,23 @@ export default class NodeVisualizer {
   _getPointerIntersections (event: PointerEvent): Intersection[] {
     if (this.usePipeline) {
       const modelIntersections = interactionHelper.getIntersections(
-        event, this.bundle.renderer as any, this.objectsRootNode.children,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+        event, this.bundle.renderer as any,this.objectsRootNode.children,
       )
       if (modelIntersections.length > 0) {
         return modelIntersections
       }
 
       const brickIntersections = interactionHelper.getIntersections(
-        event, this.bundle.renderer as any, this.brickRootNode.children,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+        event, this.bundle.renderer as any,this.brickRootNode.children,
       )
       return brickIntersections
     }
     else {
       const mixedIntersections = interactionHelper.getIntersections(
-        event, this.bundle.renderer as any, this.threeJsRootNode.children,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+        event, this.bundle.renderer as any,this.threeJsRootNode.children,
       )
       return mixedIntersections
     }

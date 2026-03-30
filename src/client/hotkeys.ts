@@ -1,12 +1,30 @@
+import type SceneManager from "./sceneManager.js"
+import type Node from "../common/project/node.js"
+
+interface HotkeyEvent {
+  hotkey: string
+  description: string
+  callback: (node: Node | null) => void
+}
+
+interface HotkeyGroup {
+  title: string
+  events: HotkeyEvent[]
+}
+
+export interface HotkeysPluginHooks {
+  getHotkeys: () => HotkeyGroup[]
+}
+
 /*
  *  @class Hotkeys
  */
 export default class Hotkeys {
-  sceneManager: any
+  sceneManager: SceneManager
   bootboxOpen: boolean
-  events: Record<string, Array<{hotkey: string, description: string}>>
+  events: Partial<Record<string, Array<{hotkey: string, description: string}>>>
 
-  constructor (pluginHooks: any, sceneManager: any) {
+  constructor (pluginHooks: HotkeysPluginHooks, sceneManager: SceneManager) {
     this.showHelp = this.showHelp.bind(this)
     this.sceneManager = sceneManager
     this.bootboxOpen = false
@@ -16,7 +34,7 @@ export default class Hotkeys {
     })
     this.bind("esc", "General", "Close modal window", () => { bootbox.hideAll() })
 
-    for (const events of Array.from(pluginHooks.getHotkeys())) {
+    for (const events of pluginHooks.getHotkeys()) {
       this.addEvents(events)
     }
   }
@@ -26,7 +44,7 @@ export default class Hotkeys {
       return
     }
     let message = ""
-    for (const group of Object.keys(this.events || {})) {
+    for (const group of Object.keys(this.events)) {
       const events = this.events[group]
       if (!events) continue
       message += "<section><h4>" + group + "</h4>"
@@ -64,7 +82,7 @@ export default class Hotkeys {
    * @param {String} description Description to show in help
    * @param {Function} callback Callback to be called when event is triggered
    */
-  bind (hotkey: string, titlegroup: string, description: string, callback: (node: any) => void) {
+  bind (hotkey: string, titlegroup: string, description: string, callback: (node: Node | null) => void) {
     Mousetrap.bind(hotkey.toLowerCase(), () => { callback(this.sceneManager.selectedNode) })
     Mousetrap.bind(hotkey.toUpperCase(), () => { callback(this.sceneManager.selectedNode) })
     if (this.events[titlegroup] === undefined) {
@@ -73,11 +91,9 @@ export default class Hotkeys {
     return this.events[titlegroup].push({hotkey, description})
   }
 
-  addEvents (eventSpecs: any): void {
-    if ((eventSpecs != null ? eventSpecs.events : undefined) != null) {
-      Array.from(eventSpecs.events)
-        .map((event: any) =>
-          this.bind(event.hotkey, eventSpecs.title, event.description, event.callback))
-    }
+  addEvents (eventSpecs: HotkeyGroup): void {
+    eventSpecs.events
+      .map((event: HotkeyEvent) =>
+        this.bind(event.hotkey, eventSpecs.title, event.description, event.callback))
   }
 }

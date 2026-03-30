@@ -123,9 +123,7 @@ export default class VoxelSelector {
     }
     // We have not even found a frontier voxel: (voxel is undefined)
     if (type === "3d") {
-      if (voxel == null) {
-        voxel = this._getBaseplateVoxel(event, type)
-      }
+      voxel = this._getBaseplateVoxel(event, type)
       if (voxel == null) {
         voxel = this._getMiddleVoxel(event)
       }
@@ -139,6 +137,7 @@ export default class VoxelSelector {
       return voxel
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const levelWorldPosition = this.grid.mapVoxelToWorld({x: 0, y: 0, z: this.level!}).z
     const position = interactionHelper.getPlanePosition(
       event,
@@ -163,6 +162,7 @@ export default class VoxelSelector {
 
     // The frontier lego voxel is the first voxel in the intersection
     // If we want lego, use it, if we want 3d, there is nothing to be found
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (prevVoxel === undefined) {
       if (type === "lego") {
         return frontierVoxel

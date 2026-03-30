@@ -31,34 +31,27 @@ const VolumeFillWorker: VolumeFillWorkerType = {
   lastProgress: -1,
 
   fillGrid (grid: VoxelGrid, callback: Callback): FinishedMessage {
-    let voxelColumn: (VoxelData | number | undefined)[]
-    let voxelPlane: (VoxelData | number | undefined)[][]
-    let x: number | string
-    let y: number | string
     const numVoxelsX = grid.length - 1
     let numVoxelsY = 0
     let numVoxelsZ = 0
-    for (x in grid) {
-      voxelPlane = grid[x as unknown as number]
+    for (const voxelPlane of grid) {
       numVoxelsY = Math.max(numVoxelsY, voxelPlane.length - 1)
-      for (y in voxelPlane) {
-        voxelColumn = voxelPlane[y as unknown as number]
+      for (const voxelColumn of voxelPlane) {
         numVoxelsZ = Math.max(numVoxelsZ, voxelColumn.length - 1)
       }
     }
 
     this._resetProgress()
 
-    for (x in grid) {
-      voxelPlane = grid[x as unknown as number]
-      const xNum = parseInt(x)
-      for (y in voxelPlane) {
-        const yNum = parseInt(y)
+    for (let xNum = 0; xNum < grid.length; xNum++) {
+      const voxelPlane = grid[xNum]
+      for (let yNum = 0; yNum < voxelPlane.length; yNum++) {
         this._postProgress(callback, xNum, yNum, numVoxelsX, numVoxelsY)
         this._fillUp(grid, xNum, yNum, numVoxelsZ)
       }
     }
-    return callback({state: "finished", data: grid}) as unknown as FinishedMessage
+    callback({state: "finished", data: grid})
+    return {state: "finished", data: grid} as unknown as FinishedMessage
   },
 
   // _fillUp: (grid, x, y, numVoxelsZ)
@@ -97,20 +90,18 @@ const VolumeFillWorker: VolumeFillWorkerType = {
   },
 
   _setVoxels (grid: VoxelGrid, x: number, y: number, zValues: number[], voxelData: number) {
-    return (() => {
-      let zValue: number | undefined
-      const result: void[] = []
-      while (zValue = zValues.pop()) {
-        result.push(this._setVoxel(grid, x, y, zValue, voxelData))
-      }
-      return result
-    })()
+    let zValue: number | undefined
+    while ((zValue = zValues.pop()) !== undefined) {
+      this._setVoxel(grid, x, y, zValue, voxelData)
+    }
   },
 
   _setVoxel (grid: VoxelGrid, x: number, y: number, z: number, voxelData: number) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (grid[x] == null) {
       grid[x] = []
     }
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (grid[x][y] == null) {
       grid[x][y] = []
     }

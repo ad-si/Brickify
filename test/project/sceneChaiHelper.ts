@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 interface LastModified {
   date: number;
   cause: string;
@@ -29,5 +30,5 @@ export default function (chaiObj: any, utils: any): void {
     utils.transferFlags(this, assertCause, false)
     assertCause.equal(cause)
     return this
-  }) as unknown as void
+  }) as unknown as undefined
 }

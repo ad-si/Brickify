@@ -175,7 +175,7 @@ export default class CSG {
           threeGeometry.applyMatrix(threeHelper.getTransformMatrix(selectedNode as any))
           resolve(threeGeometry)
         })
-        .catch((error: unknown) => { reject(error) })
+        .catch((error: unknown) => { reject(error instanceof Error ? error : new Error(String(error))) })
     })
   }
 

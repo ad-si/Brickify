@@ -77,11 +77,11 @@ const initializeWizard = function (modalElement: JQuery): void {
       // Apply data values
       const studVal = $wizardStudSizeSelect?.val()
       $studSizeSelect
-        ?.find(`option[value=${studVal}]`)
+        ?.find(`option[value=${String(studVal)}]`)
         .attr("selected", "selected")
       const holeVal = $wizardHoleSizeSelect?.val()
       $holeSizeSelect
-        ?.find(`option[value=${holeVal}]`)
+        ?.find(`option[value=${String(holeVal)}]`)
         .attr("selected", "selected")
 
       // Trigger intput event - so that
@@ -126,14 +126,14 @@ const initializeWizard = function (modalElement: JQuery): void {
   }
 
   // Bind button logic
-  $nextButton.click(() => $wizardStepObjects[currentWizardStep]
+  $nextButton.on("click", () => $wizardStepObjects[currentWizardStep]
     .fadeOut(wizardFadeTime, () => {
       currentWizardStep++
       applyCurrentWizardStep()
       return updateButtonCaptions()
     }))
 
-  $backButton.click(() => $wizardStepObjects[currentWizardStep]
+  $backButton.on("click", () => $wizardStepObjects[currentWizardStep]
     .fadeOut(wizardFadeTime, () => {
       currentWizardStep--
       applyCurrentWizardStep()
@@ -141,7 +141,7 @@ const initializeWizard = function (modalElement: JQuery): void {
     }))
 
   // Fade out size select, start wizard on click
-  $startWizard.click(() => {
+  $startWizard.on("click", () => {
     currentWizardStep = 0
     updateButtonCaptions()
     $legoContent?.fadeOut(wizardFadeTime)

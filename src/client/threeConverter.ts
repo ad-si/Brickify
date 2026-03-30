@@ -66,6 +66,7 @@ export function toBufferGeometry (modelObject: ModelObject): BufferGeometry {
   // have to use this lowlevel datatype to view anything
   const parray = new Float32Array(vertexCoordinates.length)
   for (i = 0, end = vertexCoordinates.length - 1, asc = end >= 0; asc ? i <= end : i >= end; asc ? i++ : i--) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     parray[i] = vertexCoordinates[i]!
   }
 
@@ -76,6 +77,7 @@ export function toBufferGeometry (modelObject: ModelObject): BufferGeometry {
 
   const iarray = new Uint32Array(faceVertexIndices.length)
   for (i = 0, end2 = faceVertexIndices.length - 1, asc2 = end2 >= 0; asc2 ? i <= end2 : i >= end2; asc2 ? i++ : i--) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     iarray[i] = faceVertexIndices[i]!
   }
 

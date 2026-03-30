@@ -40,7 +40,7 @@ export default class EditUi {
 
   _initPartList () {
     return $("#brickCountContainer")
-      .click(() => {
+      .on("click", () => {
         const legoInstructions = this.bundle.getPlugin("lego-instructions") as LegoInstructionsPlugin | null
         if (legoInstructions == null) {
           return

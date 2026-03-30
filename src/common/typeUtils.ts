@@ -89,7 +89,10 @@ export function toString(value: unknown, fallback: string = ''): string {
   if (value === null || value === undefined) {
     return fallback
   }
-  return String(value)
+  if (typeof value === 'object' || typeof value === 'function') {
+    return fallback
+  }
+  return String(value as string | number | boolean | symbol | bigint)
 }
 
 /**

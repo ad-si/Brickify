@@ -16,7 +16,7 @@ describe("brickLayouter split", () => { it("should split one brick and relayout 
   const v3 = grid.setVoxel({ x: 1, y: 1, z: 0 })
   const v4 = grid.setVoxel({ x: 1, y: 2, z: 0 })
 
-  grid.initializeBricks()
+  void grid.initializeBricks()
 
   // merge bricks to one single (invalid) brick
   const b0 = v0.brick as Brick
@@ -27,7 +27,7 @@ describe("brickLayouter split", () => { it("should split one brick and relayout 
 
   // split it up and relayout
   const bricksToSplit = new Set<Brick>([v0.brick as Brick])
-  layoutOptimizer.splitBricksAndRelayoutLocally(bricksToSplit, grid, true, false)
+  void layoutOptimizer.splitBricksAndRelayoutLocally(bricksToSplit, grid, true, false)
 
   // expect to be more than 1 brick
   const bricks = grid.getAllBricks()

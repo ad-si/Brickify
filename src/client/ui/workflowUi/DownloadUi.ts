@@ -45,7 +45,7 @@ export default class DownloadUi {
       .append(this.$downloadModal)
 
     // show modal when clicking on download button
-    return this.$downloadButton.click(() => {
+    return this.$downloadButton.on("click", () => {
       ;(this.$downloadModal as JQuery & { modal: (action: string) => void }).modal("show")
     })
   }

@@ -50,7 +50,11 @@ export default class Node extends SyncObject {
     this.transientProperties = []
     this.name = name ?? null
     this.modelIdentifier = modelIdentifier ?? null
-    this.transform = {} as Transform
+    this.transform = {
+      position: {x: 0, y: 0, z: 0},
+      rotation: {x: 0, y: 0, z: 0},
+      scale: {x: 1, y: 1, z: 1},
+    }
     this._setTransform(transform)
   }
 
@@ -61,7 +65,7 @@ export default class Node extends SyncObject {
   _loadSubObjects () {
     // Ensure transform is properly initialized after deserialization
     // The transform object may be missing or incomplete when restored from storage
-    this._setTransform(this.transform || {})
+    this._setTransform(this.transform)
   }
 
   getPluginData (key: string): Promise<unknown> {
@@ -158,8 +162,8 @@ export default class Node extends SyncObject {
       param = {}
     }
     const {position, rotation, scale} = param
-    this.transform.position = position || this.transform.position || {x: 0, y: 0, z: 0}
-    this.transform.rotation = rotation || this.transform.rotation || {x: 0, y: 0, z: 0}
-    this.transform.scale = scale || this.transform.scale || {x: 1, y: 1, z: 1}
+    this.transform.position = position ?? this.transform.position
+    this.transform.rotation = rotation ?? this.transform.rotation
+    this.transform.scale = scale ?? this.transform.scale
   }
 }

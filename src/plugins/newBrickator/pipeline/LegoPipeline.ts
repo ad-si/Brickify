@@ -76,6 +76,7 @@ export default class LegoPipeline {
       },
       worker: (lastResult: PipelineData, options: PipelineOptions, progressCallback: ProgressCallback) => {
         return this.volumeFiller.fillGrid(
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           lastResult.grid!,
           lastResult.gridPOJO,
           options,
@@ -90,6 +91,7 @@ export default class LegoPipeline {
         return options.initLayout ?? false
       },
       worker: (lastResult: PipelineData, _options: PipelineOptions, _progressCallback: ProgressCallback): Promise<any> => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return lastResult.grid!.initializeBricks() as any
       },
     })
@@ -130,10 +132,12 @@ export default class LegoPipeline {
         return options.reLayout ?? false
       },
       worker: (lastResult: PipelineData, _options: PipelineOptions, _progressCallback: ProgressCallback) => {
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
         return this.layoutOptimizer.splitBricksAndRelayoutLocally(
           lastResult.modifiedBricks!,
           lastResult.grid!,
         )
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
       },
     })
 
@@ -143,6 +147,7 @@ export default class LegoPipeline {
         return (options.layouting ?? false) || (options.reLayout ?? false)
       },
       worker: (lastResult: PipelineData, _options: PipelineOptions): Promise<any> => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return this.layoutOptimizer.optimizeLayoutStability(lastResult.grid!) as any
       },
     })
@@ -151,8 +156,8 @@ export default class LegoPipeline {
   run (data: PipelineData, options: PipelineOptions | null = null, _useWorker?: boolean): Promise<PipelineData> {
     this.terminated = false
     log.debug(`Starting Lego Pipeline \
-(voxelizing: ${options?.voxelizing}, layouting: ${options?.layouting}, \
-onlyReLayout: ${options?.reLayout})`,
+(voxelizing: ${String(options?.voxelizing)}, layouting: ${String(options?.layouting)}, \
+onlyReLayout: ${String(options?.reLayout)})`,
     )
 
     const randomSeed = Math.floor(Math.random() * 1000000)
@@ -163,7 +168,7 @@ onlyReLayout: ${options?.reLayout})`,
 
     const runPromise = this.runPromise(0, data, options ?? {})
       .then((result: PipelineData) => {
-        log.debug(`Finished Lego Pipeline in ${new Date().getTime() - start.getTime()}ms`)
+        log.debug(`Finished Lego Pipeline in ${String(new Date().getTime() - start.getTime())}ms`)
         return result
       })
 
@@ -189,7 +194,7 @@ onlyReLayout: ${options?.reLayout})`,
     else {
       return this.runStep(i, data, options, progressCallback)
         .then((result: PipelineData) => {
-          for (const key of Object.keys(result || {})) {
+          for (const key of Object.keys(result)) {
             data[key] = result[key]
           }
           return this.runPromise(++i, data, options)
@@ -207,7 +212,7 @@ onlyReLayout: ${options?.reLayout})`,
       return step.worker(lastResult, options, progressCallback)
         .then((result: PipelineData) => {
           const stop = new Date().getTime() - start.getTime()
-          log.debug(`Step ${step.name} finished in ${stop}ms`)
+          log.debug(`Step ${step.name} finished in ${String(stop)}ms`)
           return result
         })
     }

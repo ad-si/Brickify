@@ -100,7 +100,7 @@ export default class PlateLayouter extends Layouter {
 
     // Check that the neighbors together don't exceed this brick's width
     let width = 0
-    let noMerge = false
+    let noMerge: boolean = false
 
     neighborsInDirection.forEach((neighbor: Brick) => {
       const neighborSize = neighbor.getSize()
@@ -112,6 +112,7 @@ export default class PlateLayouter extends Layouter {
       }
       return width += widthFn(neighborSize)
     })
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (noMerge) {
       return null
     }
@@ -129,7 +130,7 @@ export default class PlateLayouter extends Layouter {
 
     let length: number | null = null
 
-    let invalidSize = false
+    let invalidSize: boolean = false
     neighborsInDirection.forEach((neighbor: Brick) => {
       if (length == null) {
         length = lengthFn(neighbor.getSize())
@@ -146,11 +147,13 @@ export default class PlateLayouter extends Layouter {
         invalidSize = true
       }
     })
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (invalidSize) {
       return null
     }
 
     if (Brick.isValidSize(widthFn(brick.getSize()), lengthFn(brick.getSize()) +
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         length!, brick.getSize().z)) {
       return neighborsInDirection
     }
@@ -193,16 +196,14 @@ export default class PlateLayouter extends Layouter {
     const largestConnections = numConnections.filter(element => element.num === maxConnections)
 
     const randomOfLargest = largestConnections[Random.next(largestConnections.length)]
-    return randomOfLargest?.index ?? 0
+    return randomOfLargest.index
   }
 
   finalLayoutPass (grid: Grid | undefined): Promise<{ grid: Grid | undefined }> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const bricksToLayout = grid!.getAllBricks()
     let finalPassMerges = 0
     bricksToLayout.forEach((brick): void => {
-      if (brick == null) {
-        return
-      }
       const merged = this._mergeLoop(brick, bricksToLayout)
       if (merged) {
         finalPassMerges++

@@ -50,10 +50,15 @@ interface BrushAction {
 interface BrushConfig {
   containerId: string;
   onBrushSelect: (node: Node, bigBrushSelected: boolean) => void;
+  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
   onBrushDown: (event: PointerEvent, node: Node) => Promise<boolean | void>;
+  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
   onBrushMove: (event: PointerEvent, node: Node) => Promise<boolean | void>;
+  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
   onBrushOver: (event: PointerEvent, node: Node) => Promise<boolean | void>;
+  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
   onBrushUp: (event: PointerEvent, node: Node) => Promise<boolean | void>;
+  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
   onBrushCancel: (event: PointerEvent, node: Node) => Promise<boolean | void>;
 }
 
@@ -96,18 +101,21 @@ export default class BrushHandler {
     this.legoBrushSelected = false
     this.bigBrushSelected = false
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     document.getElementById("everythingLego")!
       .addEventListener("click", () => {
-        return this._everythingLego(this.nodeVisualizer.selectedNode)
+        void this._everythingLego(this.nodeVisualizer.selectedNode)
       })
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     document.getElementById("everythingPrinted")!
       .addEventListener("click", () => {
-        return this._everythingPrint(this.nodeVisualizer.selectedNode)
+        void this._everythingPrint(this.nodeVisualizer.selectedNode)
       })
   }
 
   getBrushes (): BrushConfig[] {
+    /* eslint-disable @typescript-eslint/unbound-method */
     return [{
       containerId: "#legoBrush",
       onBrushSelect: this._legoSelect,
@@ -125,6 +133,7 @@ export default class BrushHandler {
       onBrushUp: this._printUp,
       onBrushCancel: this._printCancel,
     }]
+    /* eslint-enable @typescript-eslint/unbound-method */
   }
 
   _legoSelect (selectedNode: Node, bigBrushSelected: boolean) {
@@ -149,7 +158,7 @@ export default class BrushHandler {
     if (!(touchedVoxels.length > 0)) {
       return
     }
-    log.debug(`Will re-layout ${touchedVoxels.length} voxel`)
+    log.debug(`Will re-layout ${String(touchedVoxels.length)} voxel`)
 
     this.editController.relayoutModifiedParts(
       selectedNode, cachedData, touchedVoxels, true,
@@ -209,7 +218,7 @@ export default class BrushHandler {
         this._applyChanges(touchedVoxels, selectedNode, cachedData)
 
         const action = this._buildAction(touchedVoxels, selectedNode, cachedData)
-        this.undo != null ? this.undo.addTask(action.toPrint, action.toLego) : undefined
+        if (this.undo != null) { this.undo.addTask(action.toPrint, action.toLego) }
       })
   }
 
@@ -250,7 +259,7 @@ export default class BrushHandler {
           cachedData.brickVisualization.makeAllVoxelsLego(node)
           apply()
         }
-        this.undo != null ? this.undo.addTask(action.toPrint, redo) : undefined
+        if (this.undo != null) { this.undo.addTask(action.toPrint, redo) }
       })
   }
 
@@ -285,7 +294,7 @@ export default class BrushHandler {
         this._applyChanges(touchedVoxels, selectedNode, cachedData)
 
         const action = this._buildAction(touchedVoxels, selectedNode, cachedData)
-        this.undo != null ? this.undo.addTask(action.toLego, action.toPrint) : undefined
+        if (this.undo != null) { this.undo.addTask(action.toLego, action.toPrint) }
       })
   }
 
@@ -319,7 +328,7 @@ export default class BrushHandler {
         )
 
         const action = this._buildAction(changedVoxels, node, cachedData)
-        this.undo != null ? this.undo.addTask(action.toLego, action.toPrint) : undefined
+        if (this.undo != null) { this.undo.addTask(action.toLego, action.toPrint) }
       })
   }
 }

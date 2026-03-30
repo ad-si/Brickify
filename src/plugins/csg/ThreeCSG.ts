@@ -9,8 +9,8 @@ const SPANNING = 3
 
 class Polygon {
   vertices: Vertex[]
-  normal: Vertex | undefined
-  w: number | undefined
+  normal!: Vertex
+  w!: number
 
   constructor ( vertices?: Vertex[], _normal?: Vertex, _w?: number ) {
     if ( !( vertices instanceof Array ) ) {
@@ -21,9 +21,7 @@ class Polygon {
     if ( vertices.length > 0 ) {
       this.calculateProperties()
     }
-    else {
-      this.normal = this.w = undefined
-    }
+    // if no vertices, normal and w will be set lazily via calculateProperties
   }
 
   calculateProperties () {
@@ -60,8 +58,8 @@ class Polygon {
   flip () {
     let i: number; const vertices: Vertex[] = []
 
-    this.normal!.multiplyScalar( -1 )
-    this.w! *= -1
+    this.normal.multiplyScalar( -1 )
+    this.w *= -1
 
     for ( i = this.vertices.length - 1; i >= 0; i-- ) {
       vertices.push( this.vertices[i] )
@@ -72,7 +70,7 @@ class Polygon {
   }
 
   classifyVertex ( vertex: Vertex ) {
-    const side_value = this.normal!.dot( vertex ) - this.w!
+    const side_value = this.normal.dot( vertex ) - this.w
 
     if ( side_value < -EPSILON ) {
       return BACK
@@ -121,7 +119,7 @@ class Polygon {
 
     if ( classification === COPLANAR ) {
 
-      ( this.normal!.dot( polygon.normal! ) > 0 ? coplanar_front : coplanar_back ).push( polygon )
+      ( this.normal.dot( polygon.normal ) > 0 ? coplanar_front : coplanar_back ).push( polygon )
 
     }
     else if ( classification === FRONT ) {
@@ -153,7 +151,7 @@ class Polygon {
         if ( ti != BACK ) f.push( vi )
         if ( ti != FRONT ) b.push( vi )
         if ( (ti | tj) === SPANNING ) {
-          t = ( this.w! - this.normal!.dot( vi ) ) / this.normal!.dot( vj.clone()
+          t = ( this.w - this.normal.dot( vi ) ) / this.normal.dot( vj.clone()
             .subtract( vi ) )
           v = vi.interpolate( vj, t )
           f.push( v )
@@ -383,17 +381,18 @@ class Node {
   }
 
   invert (): this {
-    let i: number; let polygon_count: number; let temp: Node | undefined
+    let i: number; let polygon_count: number
 
     for ( i = 0, polygon_count = this.polygons.length; i < polygon_count; i++ ) {
       this.polygons[i].flip()
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.divider!.flip()
     if ( this.front ) this.front.invert()
     if ( this.back ) this.back.invert()
 
-    temp = this.front
+    const temp = this.front
     this.front = this.back
     this.back = temp
 
@@ -455,12 +454,12 @@ export default class ThreeBSP {
       return this
     }
     else {
-      throw "ThreeBSP: Given geometry is unsupported"
+      throw new Error("ThreeBSP: Given geometry is unsupported")
     }
 
     for ( i = 0, _length_i = geometry.faces.length; i < _length_i; i++ ) {
       face = geometry.faces[i]
-      faceVertexUvs = geometry.faceVertexUvs[0][i]
+      faceVertexUvs = geometry.faceVertexUvs[0][i] as THREE.Vector2[] | undefined
       polygon = new Polygon()
 
       if ( face instanceof THREE.Face3 ) {
@@ -510,7 +509,7 @@ export default class ThreeBSP {
         polygon.vertices.push( vertex )
       }
       else {
-        throw "Invalid face type at index " + i
+        throw new Error("Invalid face type at index " + String(i))
       }
 
       polygon.calculateProperties()
@@ -593,43 +592,43 @@ export default class ThreeBSP {
         vertex = new THREE.Vector3( vertex.x, vertex.y, vertex.z )
         vertex.applyMatrix4(matrix)
 
-        if ( typeof vertice_dict[ vertex.x + "," + vertex.y + "," + vertex.z ] !== "undefined" ) {
-          vertex_idx_a = vertice_dict[ vertex.x + "," + vertex.y + "," + vertex.z ]
+        if ( typeof vertice_dict[ `${String(vertex.x)},${String(vertex.y)},${String(vertex.z)}` ] !== "undefined" ) {
+          vertex_idx_a = vertice_dict[ `${String(vertex.x)},${String(vertex.y)},${String(vertex.z)}` ]
         }
         else {
           geometry.vertices.push( vertex )
-          vertex_idx_a = vertice_dict[ vertex.x + "," + vertex.y + "," + vertex.z ] = geometry.vertices.length - 1
+          vertex_idx_a = vertice_dict[ `${String(vertex.x)},${String(vertex.y)},${String(vertex.z)}` ] = geometry.vertices.length - 1
         }
 
         vertex = polygon.vertices[j - 1]
         verticeUvs.push( new THREE.Vector2( vertex.uv.x, vertex.uv.y ) )
         vertex = new THREE.Vector3( vertex.x, vertex.y, vertex.z )
         vertex.applyMatrix4(matrix)
-        if ( typeof vertice_dict[ vertex.x + "," + vertex.y + "," + vertex.z ] !== "undefined" ) {
-          vertex_idx_b = vertice_dict[ vertex.x + "," + vertex.y + "," + vertex.z ]
+        if ( typeof vertice_dict[ `${String(vertex.x)},${String(vertex.y)},${String(vertex.z)}` ] !== "undefined" ) {
+          vertex_idx_b = vertice_dict[ `${String(vertex.x)},${String(vertex.y)},${String(vertex.z)}` ]
         }
         else {
           geometry.vertices.push( vertex )
-          vertex_idx_b = vertice_dict[ vertex.x + "," + vertex.y + "," + vertex.z ] = geometry.vertices.length - 1
+          vertex_idx_b = vertice_dict[ `${String(vertex.x)},${String(vertex.y)},${String(vertex.z)}` ] = geometry.vertices.length - 1
         }
 
         vertex = polygon.vertices[j]
         verticeUvs.push( new THREE.Vector2( vertex.uv.x, vertex.uv.y ) )
         vertex = new THREE.Vector3( vertex.x, vertex.y, vertex.z )
         vertex.applyMatrix4(matrix)
-        if ( typeof vertice_dict[ vertex.x + "," + vertex.y + "," + vertex.z ] !== "undefined" ) {
-          vertex_idx_c = vertice_dict[ vertex.x + "," + vertex.y + "," + vertex.z ]
+        if ( typeof vertice_dict[ `${String(vertex.x)},${String(vertex.y)},${String(vertex.z)}` ] !== "undefined" ) {
+          vertex_idx_c = vertice_dict[ `${String(vertex.x)},${String(vertex.y)},${String(vertex.z)}` ]
         }
         else {
           geometry.vertices.push( vertex )
-          vertex_idx_c = vertice_dict[ vertex.x + "," + vertex.y + "," + vertex.z ] = geometry.vertices.length - 1
+          vertex_idx_c = vertice_dict[ `${String(vertex.x)},${String(vertex.y)},${String(vertex.z)}` ] = geometry.vertices.length - 1
         }
 
         face = new THREE.Face3(
           vertex_idx_a,
           vertex_idx_b,
           vertex_idx_c,
-          new THREE.Vector3( polygon.normal!.x, polygon.normal!.y, polygon.normal!.z ),
+          new THREE.Vector3( polygon.normal.x, polygon.normal.y, polygon.normal.z ),
         )
 
         geometry.faces.push( face )

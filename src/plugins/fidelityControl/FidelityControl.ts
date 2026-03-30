@@ -73,6 +73,7 @@ export default class FidelityControl {
 
   init (bundle: Bundle) {
     this.bundle = bundle
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.pluginHooks = this.bundle.pluginHooks
 
     this.currentFidelityLevel = 0
@@ -93,9 +94,11 @@ export default class FidelityControl {
     const {
       usePipeline,
     } = this.bundle.globalConfig.rendering
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
     const depth = (this.bundle.renderer as any).threeRenderer.supportsDepthTextures()
     const fragDepth = (this.bundle.renderer as any).threeRenderer.extensions.get("EXT_frag_depth")
     const stencilBuffer = (this.bundle.renderer as any).threeRenderer.hasStencilBuffer
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 
     // Capabilities detection (for debugging)
     // let _capabilites = ""
@@ -109,7 +112,7 @@ export default class FidelityControl {
     //   _capabilites += "stencilBuffer "
     // }
 
-    this.pipelineAvailable = usePipeline && (depth != null) && (fragDepth != null) && stencilBuffer
+    this.pipelineAvailable = usePipeline && (depth != null) && (fragDepth != null) && Boolean(stencilBuffer)
     return this.noPipelineDecisions = 0
   }
 
@@ -151,7 +154,7 @@ export default class FidelityControl {
       if (this.currentFidelityLevel === FidelityControl.minimalPipelineLevel) {
         this.noPipelineDecisions++
       }
-      return this._decreaseFidelity()
+      this._decreaseFidelity()
 
     }
     else if ((fps > upgradeThresholdFps) &&
@@ -163,11 +166,11 @@ export default class FidelityControl {
           return
         }
       }
-      return this._increaseFidelity()
+      this._increaseFidelity()
     }
   }
 
-  _increaseFidelity () {
+  _increaseFidelity (): void {
     // only allow pipeline when we have the extensions needed for it
     if ((this.currentFidelityLevel === 2) && !this.pipelineAvailable) {
       return
@@ -175,21 +178,21 @@ export default class FidelityControl {
 
     // Increase fidelity
     this.currentFidelityLevel++
-    return this._setFidelity()
+    this._setFidelity()
   }
 
-  _decreaseFidelity () {
+  _decreaseFidelity (): void {
     // Decrease fidelity
     this.currentFidelityLevel--
-    return this._setFidelity()
+    this._setFidelity()
   }
 
-  _setFidelity () {
+  _setFidelity (): void {
     this.pluginHooks.setFidelity(
       this.currentFidelityLevel, FidelityControl.fidelityLevels, {},
     )
-
-    return (this.bundle.renderer as any).setFidelity(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    ;(this.bundle.renderer as any).setFidelity(
       this.currentFidelityLevel, FidelityControl.fidelityLevels, {},
     )
   }
@@ -201,28 +204,30 @@ export default class FidelityControl {
         {
           description: "Increase visual complexity (turns off automatic adjustment)",
           hotkey: "i",
+          // eslint-disable-next-line @typescript-eslint/unbound-method
           callback: this._manualIncrease,
         },
         {
           description: "Decrease visual complexity (turns off automatic adjustment)",
           hotkey: "d",
+          // eslint-disable-next-line @typescript-eslint/unbound-method
           callback: this._manualDecrease,
         },
       ],
     }
   }
 
-  _manualIncrease () {
+  _manualIncrease (): void {
     this.autoAdjust = false
     if (this.currentFidelityLevel < (FidelityControl.fidelityLevels.length - 1)) {
-      return this._increaseFidelity()
+      this._increaseFidelity()
     }
   }
 
-  _manualDecrease () {
+  _manualDecrease (): void {
     this.autoAdjust = false
     if (this.currentFidelityLevel > 0) {
-      return this._decreaseFidelity()
+      this._decreaseFidelity()
     }
   }
 
@@ -242,46 +247,52 @@ export default class FidelityControl {
     }
     if ((timestamp - this.lastDisplayUpdate) > fpsDisplayUpdateTime) {
       this.lastDisplayUpdate = timestamp
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const levelAbbreviation = FidelityControl.fidelityLevels[this.currentFidelityLevel]
         .match(/[A-Z]/g)!
         .join("")
-      const fpsText = Math.round(fps) + "/" + levelAbbreviation
+      const fpsText = `${String(Math.round(fps))}/${levelAbbreviation}`
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.$fpsDisplay!.text(fpsText)
     }
   }
 
   // disables pipeline for screenshots
-  enableScreenshotMode () {
+  enableScreenshotMode (): void {
     this.screenShotMode = true
 
     const level = FidelityControl.fidelityLevels.indexOf("DefaultHigh")
     this._levelBeforeScreenshot = this.currentFidelityLevel
     this.currentFidelityLevel = level
 
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
     this.pluginHooks.setFidelity(
       level, FidelityControl.fidelityLevels,
       {screenshotMode: true},
     )
-    return (this.bundle.renderer as any).setFidelity(
+    ;(this.bundle.renderer as any).setFidelity(
       level, FidelityControl.fidelityLevels,
       {screenshotMode: true},
     )
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
   }
 
   // resets screenshot mode, restores old fidelity level
-  disableScreenshotMode () {
+  disableScreenshotMode (): void {
     this.screenShotMode = false
 
     this.currentFidelityLevel = this._levelBeforeScreenshot
 
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
     this.pluginHooks.setFidelity(
       this.currentFidelityLevel, FidelityControl.fidelityLevels,
       {screenshotMode: false},
     )
-    return (this.bundle.renderer as any).setFidelity(
+    ;(this.bundle.renderer as any).setFidelity(
       this.currentFidelityLevel, FidelityControl.fidelityLevels,
       {screenshotMode: false},
     )
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
   }
 
   reset (): void {

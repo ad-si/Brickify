@@ -1,4 +1,4 @@
-import Hotkeys from "../hotkeys.js"
+import Hotkeys, { type HotkeysPluginHooks } from "../hotkeys.js"
 import PointerDispatcher from "./pointerDispatcher.js"
 import WorkflowUi from "./workflowUi/workflowUi.js"
 import HintUi from "./HintUi.js"
@@ -51,12 +51,13 @@ export default class Ui {
 
     window.addEventListener(
       "resize",
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.windowResizeHandler,
     )
   }
 
   _initHotkeys (): void {
-    this.hotkeys = new Hotkeys(this.pluginHooks, this.bundle.sceneManager)
+    this.hotkeys = new Hotkeys(this.pluginHooks as HotkeysPluginHooks, this.bundle.sceneManager)
     this.hotkeys.addEvents(this.bundle.sceneManager.getHotkeys())
 
     const gridHotkeys = {
@@ -65,16 +66,19 @@ export default class Ui {
         {
           description: "Toggle coordinate system / lego plate",
           hotkey: "g",
+          // eslint-disable-next-line @typescript-eslint/unbound-method
           callback: this._toggleGridVisibility,
         },
         {
           description: "Toggle stability view",
           hotkey: "s",
+          // eslint-disable-next-line @typescript-eslint/unbound-method
           callback: this._toggleStabilityView,
         },
         {
           description: "Toggle LEGO assembly view",
           hotkey: "l",
+          // eslint-disable-next-line @typescript-eslint/unbound-method
           callback: this._toggleAssemblyView,
         },
       ],
@@ -83,6 +87,7 @@ export default class Ui {
       gridHotkeys.events.push({
         description: "Toggle rendering",
         hotkey: "p",
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         callback: this._toggleRendering,
       })
     }
@@ -97,7 +102,7 @@ export default class Ui {
   }
 
   _toggleStabilityView (): void {
-    this.workflowUi.toggleStabilityView()
+    void this.workflowUi.toggleStabilityView()
   }
 
   _toggleAssemblyView (): void {

@@ -10,6 +10,7 @@ import sceneChaiHelper from "./sceneChaiHelper.js"
 
 // Extend chai assertion interface to include custom methods
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Chai {
     interface Assertion {
       modified(time: number, delta?: number): Assertion;
@@ -25,7 +26,7 @@ chai.use(chaiShallowDeepEqual)
 
 const { expect } = chai
 
-let dataPackets: DataPacketsMock | null = null
+let dataPackets: DataPacketsMock
 
 describe("Scene tests", () => {
   beforeEach(() => {
@@ -35,13 +36,13 @@ describe("Scene tests", () => {
 
   describe("Scene creation", () => {
     it("should resolve after creation", () => {
-      dataPackets!.nextIds.push("abcdefgh")
+      dataPackets.nextIds.push("abcdefgh")
       const scene = new Scene()
       return expect(scene.done()).to.be.fulfilled
     })
 
     it("should be a Scene and a SyncObject", () => {
-      dataPackets!.nextIds.push("abcdefgh")
+      dataPackets.nextIds.push("abcdefgh")
       const before = Date.now()
       const scene = new Scene()
       return scene.done(() => {
@@ -60,9 +61,9 @@ describe("Scene tests", () => {
 
   describe("Scene manipulation", () => {
     it("should accept new nodes", () => {
-      dataPackets!.nextIds.push("abcdefgh")
+      dataPackets.nextIds.push("abcdefgh")
       const scene = new Scene()
-      dataPackets!.nextIds.push("ijklmnop")
+      dataPackets.nextIds.push("ijklmnop")
       const node = new Node()
       const name = "Beautiful Model"
       node.setName(name)
@@ -73,16 +74,16 @@ describe("Scene tests", () => {
         expect(scene).to.have.property("nodes").that.deep.equals([node])
         // Check lastModified properties directly
         expect(scene).to.have.nested.property("lastModified.date")
-        expect(scene).to.have.nested.property("lastModified.cause", `Node \"${name}\" added`)
+        expect(scene).to.have.nested.property("lastModified.cause", `Node "${name}" added`)
         const now = Date.now()
         expect(scene.lastModified.date).to.be.within(before, now + 2000)
       })
     })
 
     it("should remove present nodes", () => {
-      dataPackets!.nextIds.push("abcdefgh")
+      dataPackets.nextIds.push("abcdefgh")
       const scene = new Scene()
-      dataPackets!.nextIds.push("ijklmnop")
+      dataPackets.nextIds.push("ijklmnop")
       const node = new Node()
       const name = "Beautiful Model"
       node.setName(name)
@@ -95,7 +96,7 @@ describe("Scene tests", () => {
           .that.is.an("array").with.length(0)
         // Check lastModified properties directly
         expect(scene).to.have.nested.property("lastModified.date")
-        expect(scene).to.have.nested.property("lastModified.cause", `Node \"${name}\" removed`)
+        expect(scene).to.have.nested.property("lastModified.cause", `Node "${name}" removed`)
         const now = Date.now()
         expect(scene.lastModified.date).to.be.within(before, now + 2000)
       })
@@ -105,18 +106,18 @@ describe("Scene tests", () => {
   describe("Scene synchronization", () => {
     it("should store nodes as references", () => {
       let nodeId: string
-      dataPackets!.nextIds.push("sceneid")
+      dataPackets.nextIds.push("sceneid")
       const scene = new Scene()
-      dataPackets!.nextIds.push(nodeId = "nodeid")
+      dataPackets.nextIds.push(nodeId = "nodeid")
       const node = new Node()
       node.setName("Beautiful Model")
       scene.addNode(node)
-      dataPackets!.nextPuts.push(true)
-      scene.save()
+      dataPackets.nextPuts.push(true)
+      void scene.save()
       return scene.done(() => {
         const {
           packet,
-        } = dataPackets!.putCalls[0]
+        } = dataPackets.putCalls[0]
         expect(packet).to.have.nested.property("data.nodes").that.is.an("array")
         const {
           nodes,
@@ -133,15 +134,15 @@ describe("Scene tests", () => {
           nodes: [{dataPacketRef: "nodeid"}],
         },
       }
-      dataPackets!.nextGets.push(scene)
+      dataPackets.nextGets.push(scene)
       const node = {
         id: "nodeid",
         data: { modelIdentifier: "abcdefghijklmnop", name: "Beautiful Model" },
       }
-      dataPackets!.nextGets.push(node)
+      dataPackets.nextGets.push(node)
 
       const request = Scene.from("sceneid")
-      expect(request).to.be.fulfilled
+      void expect(request).to.be.fulfilled
       return (request as Promise<Scene>).then(scene => scene.done(() => {
         expect(scene).to.have.property("nodes").that.is.an("array")
         const {

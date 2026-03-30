@@ -144,8 +144,8 @@ export default class NewBrickator {
               }
             })
         })
-    ).catch((error: Error) => {
-      const msg = (error && (error.stack || error.message)) ? (error.stack || error.message) : String(error)
+    ).catch((error: unknown) => {
+      const msg = (error instanceof Error && (error.stack || error.message)) ? (error.stack || error.message) : String(error)
       log.error("newBrickator.runLegoPipeline failed:", msg)
     })
   }
@@ -189,7 +189,9 @@ export default class NewBrickator {
           .then(() => {
             cachedData.csgNeedsRecalculation = true
 
-            this.nodeVisualizer != null ? this.nodeVisualizer.objectModified(selectedNode, cachedData) : undefined
+            if (this.nodeVisualizer != null) {
+              this.nodeVisualizer.objectModified(selectedNode, cachedData)
+            }
           })
       })
       .catch((error: unknown) => {
@@ -214,6 +216,7 @@ export default class NewBrickator {
           // Create data structure
             const data: CachedData = {
               node: selectedNode,
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               grid: results.grid!,
               optimizedModel: model,
               csgNeedsRecalculation: false,
@@ -258,11 +261,12 @@ export default class NewBrickator {
     }
 
     const downloadPromise = new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.csg!
         .getCSG(selectedNode, options)
         .then((csgGeometries: unknown[]) => {
 
-          if ((csgGeometries == null) || (csgGeometries.length === 0)) {
+          if (csgGeometries.length === 0) {
             resolve([{
               data: "",
               fileName: "",
@@ -270,16 +274,14 @@ export default class NewBrickator {
             return
           }
 
-          selectedNode
+          void selectedNode
             .getName()
             .then((name: string) => {
 
               const results = csgGeometries.map((threeGeometry: any, index: number) => {
 
                 const fileName = "brickify-" +
-              name.replace(/.stl$/, "" +
-              `-${index}.stl`,
-              )
+              name.replace(/.stl$/, `-${String(index)}.stl`)
 
                 const faceVertexMesh = threeConverter
                   .threeGeometryToFaceVertexMesh(threeGeometry) as FaceVertexMesh
@@ -297,7 +299,7 @@ export default class NewBrickator {
         })
         .catch((error: unknown) => {
           log.error(error)
-          reject(error)
+          reject(error instanceof Error ? error : new Error(String(error)))
         })
     })
 

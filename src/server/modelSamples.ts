@@ -12,9 +12,7 @@ interface Sample {
   [key: string]: unknown
 }
 
-interface SamplesMap {
-  [name: string]: Sample
-}
+type SamplesMap = Partial<Record<string, Sample>>
 
 let samples: SamplesMap | null = null
 
@@ -64,5 +62,6 @@ export function getSamples (): Sample[] {
   const loadedSamples = loadSamples()
   return Object.keys(loadedSamples)
     .map(key => loadedSamples[key])
+    .filter((s): s is Sample => s != null)
     .sort((a, b) => a.printTime - b.printTime)
 }

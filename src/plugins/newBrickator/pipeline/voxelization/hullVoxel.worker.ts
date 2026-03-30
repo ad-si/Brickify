@@ -23,7 +23,7 @@ interface ProgressMessage {
 }
 
 self.onmessage = (event: MessageEvent<WorkerMessage>) => {
-  const { type, data } = event.data || {}
+  const { type, data } = event.data
   if (type === 'voxelize') {
     const { model, lineStepSize, floatDelta, voxelRoundingThreshold } = data
     const progressCallback = (message: ProgressMessage) => {

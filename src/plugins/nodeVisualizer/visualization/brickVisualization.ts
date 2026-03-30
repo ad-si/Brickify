@@ -132,6 +132,7 @@ export default class BrickVisualization {
     this._highlightVoxel = this.geometryCreator.getBrick(
       {x: 0, y: 0, z: 0},
       {x: 1, y: 1, z: 1},
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.defaultColoring.getHighlightMaterial("3d")!.voxel,
       this.fidelity,
     )
@@ -142,10 +143,6 @@ export default class BrickVisualization {
 
   showCsg (newCsgGeometry: BufferGeometry[]): boolean {
     this.csgSubnode.children = []
-    if (newCsgGeometry == null) {
-      this.csgSubnode.visible = false
-    }
-
     for (const geometry of Array.from(newCsgGeometry)) {
       const csgMesh = new THREE.Mesh(geometry, this.defaultColoring.csgMaterial)
       this.csgSubnode.add(csgMesh)
@@ -169,7 +166,7 @@ export default class BrickVisualization {
   // Updates brick and voxel visualization
   updateVisualization (coloring?: Coloring, recreate?: boolean): null {
     // Delete temporary voxels
-    let brick: BrickLike; let brickLayer: BrickLike[]; let layer: Object3D; let layerObject: Object3D; let materials; let visualBrick: BrickObject; let z: number | string
+    let brick: BrickLike; let brickLayer: BrickLike[]; let layer: Object3D; let layerObject: Object3D; let materials; let visualBrick: BrickObject; let z: number
     let asc; let end
     if (coloring == null) {
       coloring = this.defaultColoring
@@ -214,6 +211,7 @@ export default class BrickVisualization {
       .forEach((brick: BrickLike): void => {
         const pos = brick.getPosition()
         maxZ = Math.max(pos.z, maxZ)
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (brickLayers[pos.z] == null) {
           brickLayers[pos.z] = []
         }
@@ -221,23 +219,24 @@ export default class BrickVisualization {
         if (!recreate && ((brick.getVisualBrick() == null))) {
           brickLayers[pos.z].push(brick)
         }
-        if (brick.getVisualBrick() != null) {
-          brick.getVisualBrick()!.visible = true
-          brick.getVisualBrick()!.hasBeenSplit = false
+        const visualBrickRef = brick.getVisualBrick()
+        if (visualBrickRef != null) {
+          visualBrickRef.visible = true
+          visualBrickRef.hasBeenSplit = false
         }
       })
 
     // Create three layer object if it does not exist
     for (z = 0, end = maxZ, asc = end >= 0; asc ? z <= end : z >= end; asc ? z++ : z--) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (this.bricksSubnode.children[z] == null) {
         layerObject = new THREE.Object3D()
         this.bricksSubnode.add(layerObject)
       }
     }
 
-    for (z in brickLayers) {
-      brickLayer = brickLayers[z]
-      const zNum = Number(z)
+    for (const [zNum, brickLayerEntry] of brickLayers.entries()) {
+      brickLayer = brickLayerEntry
       layerObject = this.bricksSubnode.children[zNum]
 
       for (brick of Array.from(brickLayer)) {
@@ -260,8 +259,8 @@ export default class BrickVisualization {
 
     // Set stud visibility in second pass so that visibility of
     // all bricks in all layers is in the correct state
-    for (z in brickLayers) {
-      brickLayer = brickLayers[z]
+    for (const brickLayerEntry2 of brickLayers) {
+      brickLayer = brickLayerEntry2
       for (brick of Array.from(brickLayer)) {
         this._setStudVisibility(brick)
       }
@@ -293,12 +292,14 @@ export default class BrickVisualization {
     const cover = brick.getCover()
     if (cover.isCompletelyCovered) {
       showStuds = false
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       cover.coveringBricks.forEach((coverBrick: BrickLike) => showStuds = showStuds || !coverBrick.getVisualBrick()!.visible)
     }
     else {
       showStuds = true
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return brick.getVisualBrick()!
       .setStudVisibility(showStuds)
   }
@@ -319,6 +320,7 @@ export default class BrickVisualization {
       return this._highlightVoxel.visible = false
     }
     else {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return this.voxelWireframe.setVisibility(this._legoBoxVisibilityBeforeStability!)
     }
   }
@@ -423,13 +425,14 @@ export default class BrickVisualization {
       voxelType = "lego"
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const highlightMaterial = this.defaultColoring.getHighlightMaterial(voxelType)!
     const hVoxel = highlightMaterial.voxel
     const hBox = highlightMaterial.box
 
     const voxel = this.voxelSelector.getVoxel(event, {type}) as VoxelLike | null | undefined
     if (voxel != null) {
-      this._highlightVoxel.visible = true && this._highlightVoxelVisibility
+      this._highlightVoxel.visible = this._highlightVoxelVisibility
       const worldPos = this.grid.mapVoxelToWorld(voxel.position)
       this._highlightVoxel.position.set(
         worldPos.x, worldPos.y, worldPos.z,
@@ -452,6 +455,7 @@ export default class BrickVisualization {
     const size = this.voxelSelector.getBrushSize(true)
     const dimensions = new THREE.Vector3(size.x, size.y, size.z)
     if ((this.bigBrushHighlight == null) ||
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     !this.bigBrushHighlight.dimensions!.equals(dimensions)) {
       if (this.bigBrushHighlight) {
         this.brickShadowThreeNode.remove(this.bigBrushHighlight)
@@ -480,6 +484,7 @@ export default class BrickVisualization {
 
     if (bigBrush) {
       const mainVoxel = this.voxelSelector.getVoxel(event, {type: "lego"}) as VoxelLike | null | undefined
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const mat = this.defaultColoring.getHighlightMaterial("3d")!
       if (mainVoxel != null) {
         this._highlightBigBrush(mainVoxel, mat.box)
@@ -495,22 +500,24 @@ export default class BrickVisualization {
       // Show studs of brick below
       const brickBelow = voxel.neighbors?.Zm?.brick
       if (brickBelow) {
-        (brickBelow as unknown as BrickLike).getVisualBrick()!
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        ;(brickBelow as unknown as BrickLike).getVisualBrick()!
           .setStudVisibility(true)
       }
 
       // Split visual brick into voxels (only once per brick)
       if (voxel.brick) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const visualBrick = (voxel.brick as unknown as BrickLike).getVisualBrick()!
         if (!visualBrick.hasBeenSplit) {
           ;(voxel.brick as unknown as BrickLike).forEachVoxel((innerVoxel: VoxelLike) => {
             // Give this brick a 1x1 stud texture
-            visualBrick.materials!.textureStuds =
+            visualBrick.materials.textureStuds =
               this.defaultColoring.getTextureMaterialForBrick()
             const temporaryVoxel = this.geometryCreator.getBrick(
               innerVoxel.position,
               {x: 1, y: 1, z: 1},
-              visualBrick.materials!,
+              visualBrick.materials,
               this.fidelity,
             )
             temporaryVoxel.voxelPosition = innerVoxel.position
@@ -557,6 +564,7 @@ export default class BrickVisualization {
 
     if (bigBrush) {
       const mainVoxel = this.voxelSelector.getVoxel(event, {type: "3d"}) as VoxelLike | null | undefined
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const mat = this.defaultColoring.getHighlightMaterial("lego")!
       if (mainVoxel != null) {
         this._highlightBigBrush(mainVoxel, mat.box)
@@ -617,6 +625,7 @@ export default class BrickVisualization {
 
   setFidelity (fidelity: number): boolean[][] {
     this.fidelity = fidelity
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (this._highlightVoxel != null) {
       this._highlightVoxel.setFidelity(this.fidelity)
     }

@@ -14,8 +14,8 @@ export default class Dummy extends SyncObject {
   static initClass () {
     (this as unknown as DummyClass).dummyClassProperty = "e"
   }
-  constructor () {
-    super(arguments[0] as { _generateId?: boolean } | undefined)
+  constructor (param?: { _generateId?: boolean }) {
+    super(param)
     this.dummyProperty = "a"
     this.dummyTransient = "transient"
   }

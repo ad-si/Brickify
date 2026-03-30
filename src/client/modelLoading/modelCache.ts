@@ -14,14 +14,14 @@ interface MeshModel {
 // #
 
 // The cache of optimized model promises
-const modelCache: Record<string, Promise<unknown>> = {}
+const modelCache: Partial<Record<string, Promise<unknown>>> = {}
 
 const exists = (identifier: string): Promise<void> => Promise.resolve(
   $.ajax("/model/" + identifier,
     {type: "HEAD"}),
 )
   .catch((jqXHR: unknown) => {
-    const statusText = (jqXHR as { statusText?: string })?.statusText ?? 'Request failed'
+    const statusText = (jqXHR as { statusText?: string }).statusText ?? 'Request failed'
     throw new Error(statusText)
   })
 export { exists }
@@ -64,7 +64,7 @@ export const store = (model: MeshModel): Promise<string> => model
 // requests a mesh with the given identifier from the server
 const requestDataFromServer = (identifier: string): Promise<string> => Promise.resolve($.get("/model/" + identifier))
   .catch((jqXHR: unknown) => {
-    const statusText = (jqXHR as { statusText?: string })?.statusText ?? 'Request failed'
+    const statusText = (jqXHR as { statusText?: string }).statusText ?? 'Request failed'
     throw new Error(statusText)
   })
 

@@ -3,6 +3,15 @@ import { expect } from "chai"
 
 import Grid from "../../src/plugins/newBrickator/pipeline/Grid.js"
 import VoxelUnion from "../../src/plugins/csg/VoxelUnion.js"
+import ThreeBSP from "../../src/plugins/csg/ThreeCSG.js"
+
+// THREE.Geometry was removed in modern Three.js; use this local interface for legacy mesh geometry
+interface LegacyGeometry {
+  faces: THREE.Face3[]
+  vertices: THREE.Vector3[]
+}
+
+type MeshWithLegacyGeometry = Omit<THREE.Mesh, "geometry"> & { geometry: LegacyGeometry }
 
 describe("VoxelUnion", () => {
   const grid = new Grid()
@@ -13,7 +22,7 @@ describe("VoxelUnion", () => {
     const bsp = vg.run([ {x: 0, y: 0, z: 0} ])
     const {
       geometry,
-    } = (bsp as any).toMesh(null)
+    } = (bsp as ThreeBSP).toMesh(null as unknown as THREE.Material) as MeshWithLegacyGeometry
 
     expect(geometry.faces.length).to.equal(12)
     expect(geometry.vertices.length).to.equal(8)
@@ -35,7 +44,7 @@ describe("VoxelUnion", () => {
     ])
     const {
       geometry,
-    } = (bsp as any).toMesh(null)
+    } = (bsp as ThreeBSP).toMesh(null as unknown as THREE.Material) as MeshWithLegacyGeometry
 
     expect(geometry.faces.length).to.equal(32)
     expect(geometry.vertices.length).to.equal(18)
@@ -65,7 +74,7 @@ describe("VoxelUnion", () => {
     ])
     const {
       geometry,
-    } = (bsp as any).toMesh(null)
+    } = (bsp as ThreeBSP).toMesh(null as unknown as THREE.Material) as MeshWithLegacyGeometry
 
     expect(geometry.faces.length).to.equal(48)
     expect(geometry.vertices.length).to.equal(26)
@@ -275,7 +284,7 @@ describe("VoxelUnion", () => {
 })
 
 
-var faceEquality = function (faces: THREE.Face3[], indexArray: number[]) {
+const faceEquality = function (faces: THREE.Face3[], indexArray: number[]) {
   // checks if the indices stored in the faces have the same order
   // as the indexArray (consisting out of numbers)
   let i = 0

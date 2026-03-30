@@ -52,7 +52,7 @@ export default class DownloadProvider {
         Spinner.startOverlay(this.$stlButton[0])
         this.$stlButton.addClass("disabled")
         return window.setTimeout(
-          () => this._createDownload("stl", selNode),
+          () => { void this._createDownload("stl", selNode) },
           20,
         )
       }
@@ -66,7 +66,7 @@ export default class DownloadProvider {
         Spinner.startOverlay(this.$instructionsButton[0])
         this.$instructionsButton.addClass("disabled")
         return window.setTimeout(
-          () => this._createDownload("instructions", selNode),
+          () => { void this._createDownload("instructions", selNode) },
           20,
         )
       }
@@ -130,7 +130,7 @@ export default class DownloadProvider {
 
               saveAs(
                 zip.generate({type: "blob"}),
-                `brickify-${selectedNode.name}.zip`,
+                `brickify-${selectedNode.name ?? ""}.zip`,
               )
             })
 
@@ -170,7 +170,7 @@ Use the Make 3D-print brush for that.",
   }
 
 
-  _convertToZippableType ({data, fileName}: DownloadFile): Promise<ZippableFile> | void {
+  _convertToZippableType ({data, fileName}: DownloadFile): Promise<ZippableFile | undefined> {
     switch (false) {
       case !(data instanceof Blob):
         return this._arrayBufferFromBlob(data as Blob, fileName)
@@ -193,7 +193,7 @@ Use the Make 3D-print brush for that.",
           },
         })
       default:
-        { log.warn(`No conversion method found for file ${fileName}`); return }
+        { log.warn(`No conversion method found for file ${fileName}`); return Promise.resolve(undefined) }
     }
   }
 

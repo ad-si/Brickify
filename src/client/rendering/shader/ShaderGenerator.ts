@@ -9,8 +9,8 @@ export interface ShaderCode {
 /*
  * Takes several shader parts and creates a shader material out of it
  */
-export default class ShaderGenerator {
-  static generateShader (arrayOfParts: ShaderPart[]): ShaderCode {
+const ShaderGenerator = {
+  generateShader (arrayOfParts: ShaderPart[]): ShaderCode {
     let vertexVariables = ""
     let vertexPreMain = ""
     let vertexInMain = ""
@@ -56,9 +56,9 @@ export default class ShaderGenerator {
       vertex: vert,
       fragment: frag,
     }
-  }
+  },
 
-  static _generateVertexShader (variables: string, preMain: string, inMain: string): string {
+  _generateVertexShader (variables: string, preMain: string, inMain: string): string {
     let shaderCode = "\
 precision highp float; \
 precision highp int; \
@@ -84,9 +84,9 @@ gl_Position = pos; \
 }\
 "
     return shaderCode
-  }
+  },
 
-  static _generateFragmentShader (variables: string, preMain: string, inMain: string): string {
+  _generateFragmentShader (variables: string, preMain: string, inMain: string): string {
     let shaderCode = "\
 #extension GL_EXT_frag_depth : enable\n \
 precision highp float; \
@@ -112,5 +112,7 @@ gl_FragColor = col; \
 }\
 "
     return shaderCode
-  }
+  },
 }
+
+export default ShaderGenerator

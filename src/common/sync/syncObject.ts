@@ -87,7 +87,7 @@ export default class SyncObject {
     const _syncObjectFromPacket = (packet: DataPacket): Promise<T> => {
       const instance = new this({ _generateId: false })
       return instance.next((syncObject: T) => {
-        for (const p of Object.keys(packet.data || {})) {
+        for (const p of Object.keys(packet.data)) {
           (syncObject as Record<string, unknown>)[p] = packet.data[p]
         }
         syncObject.id = packet.id
@@ -181,8 +181,7 @@ export default class SyncObject {
       pojso !== null &&
       'id' in pojso &&
       typeof (pojso as DataPacket).id === 'string' &&
-      'data' in pojso &&
-      (pojso as DataPacket).data != null
+      'data' in pojso
     )
   }
 
@@ -262,7 +261,7 @@ export default class SyncObject {
     onFulfilled?: (self: this) => T | PromiseLike<T>,
     onRejected?: (reason: unknown) => T | PromiseLike<T>,
   ): this {
-    this.done(onFulfilled, onRejected)
+    void this.done(onFulfilled, onRejected)
     return this
   }
 
