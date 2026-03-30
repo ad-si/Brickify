@@ -27,6 +27,9 @@
     "Yannis Kommana"
   ],
   "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "postinstall": "node scripts/patch-three-esm.js"
+  },
   "dependencies": {
     "blueimp-md5": "^2.19.0",
     "body-parser": "^2.2.2",

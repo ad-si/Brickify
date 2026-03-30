@@ -1,6 +1,6 @@
 import fs from "fs"
 import fsp from "fs-promise"
-import mkdirp from "mkdirp"
+import { mkdirp } from "mkdirp"
 import md5 from "blueimp-md5"
 import log from "winston"
 
@@ -18,16 +18,16 @@ export function exists (hash: string): Promise<string> {
     return Promise.reject(new Error("invalid hash"))
   }
 
-  return new Promise((resolve, reject) => { fs.exists(cacheDirectory + hash, (exists) => {
-    if (exists) {
-      resolve(hash)
-      return
-    }
-    else {
-      reject(new Error(hash))
-      return
-    }
-  }) })
+  return new Promise((resolve, reject) => {
+    fs.access(cacheDirectory + hash, fs.constants.F_OK, (err) => {
+      if (!err) {
+        resolve(hash)
+      }
+      else {
+        reject(new Error(hash))
+      }
+    })
+  })
 }
 
 export function get (hash: string): Promise<Buffer> {

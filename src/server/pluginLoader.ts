@@ -1,8 +1,8 @@
 import fsp from "fs/promises"
 import path from "path"
-import winston from "winston"
 import yaml from "js-yaml"
 
+import log from "./logger.js"
 import PluginHooks from "../common/pluginHooks.js"
 import packageJson from "../../package.json" with { type: "json"}
 import type { Plugin } from "../types/plugin.js"
@@ -10,8 +10,6 @@ import type { Plugin } from "../types/plugin.js"
 interface NodeError extends Error {
   code?: string;
 }
-
-const log = winston.loggers.get("log")
 
 // Load the hook list and initialize the pluginHook management
 export const pluginHooks = new PluginHooks()
@@ -30,6 +28,19 @@ function initPluginInstance (pluginInstance: Plugin): void {
 }
 
 async function loadPlugin (directory: string): Promise<void> {
+  // Skip client-only plugins (browser entry but no main/server entry)
+  try {
+    const pluginPkg = JSON.parse(
+      await fsp.readFile(path.join(directory, "package.json"), "utf8"),
+    ) as Record<string, unknown>
+    if (pluginPkg.browser && !pluginPkg.main) {
+      return
+    }
+  }
+  catch {
+    // No package.json — try loading anyway
+  }
+
   log.info(`Loading plugin "${directory}" …`)
 
   let instance
@@ -37,9 +48,11 @@ async function loadPlugin (directory: string): Promise<void> {
     instance = await import(`${directory}/${path.basename(directory)}.js`)
   }
   catch (error) {
-    if ((error as NodeError).code !== "MODULE_NOT_FOUND") {
-      throw error
+    const code = (error as NodeError).code
+    if (code === "MODULE_NOT_FOUND" || code === "ERR_MODULE_NOT_FOUND") {
+      return
     }
+    log.warn(`Failed to load plugin "${path.basename(directory)}": ${String(error)}`)
     return
   }
 

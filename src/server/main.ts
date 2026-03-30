@@ -4,7 +4,6 @@ import path from "path"
 import fsp from "fs/promises"
 
 import bootstrap from "bootstrap-styl"
-import winston from "winston"
 import express from "express"
 import bodyParser from "body-parser"
 import compress from "compression"
@@ -16,28 +15,16 @@ import nib from "nib"
 import yaml from "js-yaml"
 import cookieParser from "cookie-parser"
 
+import log from "./logger.js"
 import * as urlSessions from "./urlSessions.js"
-
-const __dirname = import.meta.dirname
-
-const loggingLevel = "warn"
-
-// Make logger available to other modules.
-// Must be instantiated before requiring bundled modules
-winston.loggers.add("log", {
-  console: {
-    level: loggingLevel,
-    colorize: true,
-  },
-})
-const log = winston.loggers.get("log")
-
 import * as pluginLoader from "./pluginLoader.js"
 import app from "../../routes/app.js"
 import * as landingPage from "../../routes/landingpage.js"
 import * as models from "../../routes/models.js"
 import * as dataPackets from "../../routes/dataPackets.js"
 import sharelinkGen from "../../routes/share.js"
+
+const __dirname = import.meta.dirname
 
 interface GlobalConfig {
   colors: {
@@ -66,7 +53,7 @@ else {
 
 export async function setupRouting (port: number | string): Promise<void> {
   webapp.set("hostname", developmentMode
-    ? `localhost:${port}`
+    ? `localhost:${String(port)}`
     : process.env.HOSTNAME,
   )
 
@@ -178,7 +165,7 @@ export async function setupRouting (port: number | string): Promise<void> {
     }
     else {
       log.warn('Got a server restart command without a "ref" ' +
-        "json member from " + request.connection.remoteAddress,
+        `json member from ${request.socket.remoteAddress ?? ""}`,
       )
       response.send("")
       return
@@ -215,13 +202,12 @@ export async function startServer (_port?: number | string, _ip?: string): Promi
 
   server.on("error", (error: NodeError) => {
     if (error.code === "EADDRINUSE") {
-      log.error(`Another Server is already listening on ${srvrIp}:${srvrPort}`)
-      return
+      console.error(`Another server is already listening on ${srvrIp}:${String(srvrPort)}`)
     }
     else {
-      log.error("Server could not be started:", error)
-      return
+      console.error("Server could not be started:", error)
     }
+    process.exit(1)
   })
 
   await setupRouting(srvrPort)
@@ -229,6 +215,6 @@ export async function startServer (_port?: number | string, _ip?: string): Promi
   server.listen(
     Number(srvrPort),
     srvrIp,
-    () => { log.info(`Server is listening on ${srvrIp}:${srvrPort}`) },
+    () => { console.log(`Server is listening on ${srvrIp}:${String(srvrPort)}`) },
   )
 }
