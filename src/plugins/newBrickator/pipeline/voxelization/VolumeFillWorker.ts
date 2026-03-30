@@ -3,7 +3,7 @@ interface VoxelData {
   z?: number
 }
 
-export type VoxelGrid = (VoxelData | number | undefined)[][][]
+export type VoxelGrid = (((VoxelData | number | undefined)[] | undefined)[] | undefined)[]
 
 interface ProgressMessage {
   state: "progress"
@@ -31,9 +31,9 @@ const VolumeFillWorker: VolumeFillWorkerType = {
   lastProgress: -1,
 
   fillGrid (grid: VoxelGrid, callback: Callback): FinishedMessage {
-    if (!grid || grid.length === 0) {
-      callback({state: "finished", data: grid ?? []})
-      return {state: "finished", data: grid ?? []} as unknown as FinishedMessage
+    if (grid.length === 0) {
+      callback({state: "finished", data: grid})
+      return {state: "finished", data: grid} as unknown as FinishedMessage
     }
     const numVoxelsX = grid.length - 1
     let numVoxelsY = 0
@@ -105,11 +105,9 @@ const VolumeFillWorker: VolumeFillWorkerType = {
   },
 
   _setVoxel (grid: VoxelGrid, x: number, y: number, z: number, voxelData: number) {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (grid[x] == null) {
       grid[x] = []
     }
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (grid[x][y] == null) {
       grid[x][y] = []
     }
