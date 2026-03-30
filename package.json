@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+    "@rolldown/binding-linux-arm64-gnu": "^1.0.0-rc.12",
     "blueimp-md5": "^2.19.0",
     "body-parser": "^2.2.2",
     "bootbox": "^6.0.4",
