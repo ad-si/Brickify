@@ -242,6 +242,7 @@ export default class BrickVisualization {
     }
 
     for (const [zNum, brickLayerEntry] of brickLayers.entries()) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (brickLayerEntry == null) { continue }
       brickLayer = brickLayerEntry
       layerObject = this.bricksSubnode.children[zNum]
@@ -267,6 +268,7 @@ export default class BrickVisualization {
     // Set stud visibility in second pass so that visibility of
     // all bricks in all layers is in the correct state
     for (const brickLayerEntry2 of brickLayers) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (brickLayerEntry2 == null) { continue }
       brickLayer = brickLayerEntry2
       for (brick of Array.from(brickLayer)) {
