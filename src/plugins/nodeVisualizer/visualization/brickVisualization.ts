@@ -242,6 +242,7 @@ export default class BrickVisualization {
     }
 
     for (const [zNum, brickLayerEntry] of brickLayers.entries()) {
+      if (brickLayerEntry == null) { continue }
       brickLayer = brickLayerEntry
       layerObject = this.bricksSubnode.children[zNum]
 
@@ -266,6 +267,7 @@ export default class BrickVisualization {
     // Set stud visibility in second pass so that visibility of
     // all bricks in all layers is in the correct state
     for (const brickLayerEntry2 of brickLayers) {
+      if (brickLayerEntry2 == null) { continue }
       brickLayer = brickLayerEntry2
       for (brick of Array.from(brickLayer)) {
         this._setStudVisibility(brick)
