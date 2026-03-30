@@ -9,6 +9,8 @@ import log from "loglevel"
 
 import Bundle from "./bundle.js"
 
+import type { GlobalConfig } from "../types/index.js"
+
 import globalConfig from "../common/globals.yaml"
 
 if (process.env.NODE_ENV === "development") {
@@ -51,7 +53,7 @@ const postInitCallback = function () {
   return window.location.hash = ""
 }
 
-const bundle = new Bundle(globalConfig)
+const bundle = new Bundle(globalConfig as GlobalConfig)
 void bundle.init()
   .then(postInitCallback)
 

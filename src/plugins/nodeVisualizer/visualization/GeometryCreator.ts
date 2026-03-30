@@ -1,4 +1,4 @@
-import THREE, { BoxGeometry, BufferGeometry, CylinderGeometry, Geometry, Material, Mesh } from "three"
+import THREE, { BoxGeometry, BufferGeometry, CylinderGeometry, Geometry, Material, Mesh} from "three"
 
 import BrickObject from "./BrickObject.js"
 import type Grid from "../../newBrickator/pipeline/Grid.js"
@@ -99,13 +99,13 @@ export default class GeometryCreator {
         brickDimensions,
         worldBrickSize,
         this.studGeometryCache,
-        this.studGeometry as any,
+        this.studGeometry as unknown as Geometry,
       ),
       highFiStudGeometry: this._getStudsGeometry(
         brickDimensions,
         worldBrickSize,
         this.highFiStudGeometryCache,
-        this.highFiStudGeometry as any,
+        this.highFiStudGeometry as unknown as Geometry,
       ),
       planeGeometry: this._getPlaneGeometry(brickDimensions, worldBrickSize),
     }

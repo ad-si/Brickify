@@ -1,4 +1,4 @@
-import THREE, { Object3D, Mesh, BufferGeometry, Material, MeshLambertMaterial } from "three"
+import THREE, { Object3D, Mesh, BufferGeometry, Material, MeshLambertMaterial, PerspectiveCamera } from "three"
 
 import GeometryCreator from "./GeometryCreator.js"
 import StabilityColoring from "./StabilityColoring.js"
@@ -9,9 +9,15 @@ import type Grid from "../../newBrickator/pipeline/Grid.js"
 import type BrickObject from "./BrickObject.js"
 import type Voxel from "../../newBrickator/pipeline/Voxel.js"
 
+interface VisualizationRenderer {
+  getCamera: () => PerspectiveCamera
+  getDomElement: () => HTMLCanvasElement
+  scene: { matrix: THREE.Matrix4 }
+}
+
 interface Bundle {
-  globalConfig: unknown
-  renderer: unknown
+  globalConfig: { studSize: { radius: number; height: number } }
+  renderer: VisualizationRenderer
 }
 
 interface Position {
@@ -126,8 +132,8 @@ export default class BrickVisualization {
     this.voxelWireframe = new VoxelWireframe(
       this.bundle, this.grid, this.brickShadowThreeNode, this.defaultColoring,
     )
-    this.geometryCreator = new GeometryCreator(this.bundle.globalConfig as any, this.grid)
-    this.voxelSelector = new VoxelSelector(this as any)
+    this.geometryCreator = new GeometryCreator(this.bundle.globalConfig, this.grid)
+    this.voxelSelector = new VoxelSelector(this)
 
     this._highlightVoxel = this.geometryCreator.getBrick(
       {x: 0, y: 0, z: 0},
@@ -282,7 +288,7 @@ export default class BrickVisualization {
 
     // Show not filled lego shape as outline
     const outlineCoords = this.printVoxels.map((voxel: VoxelLike) => voxel.position)
-    this.voxelWireframe.createWireframe(outlineCoords as any)
+    this.voxelWireframe.createWireframe(outlineCoords)
 
     return this._visibleChildLayers = null
   }
@@ -311,7 +317,7 @@ export default class BrickVisualization {
   setStabilityView (enabled: boolean): boolean {
     this.isStabilityView = enabled
     const coloring = this.isStabilityView ? this.stabilityColoring : this.defaultColoring
-    this.updateVisualization(coloring as any)
+    this.updateVisualization(coloring)
 
     // Turn off possible lego box and highlight during stability view
     if (enabled) {
@@ -461,7 +467,7 @@ export default class BrickVisualization {
         this.brickShadowThreeNode.remove(this.bigBrushHighlight)
       }
       this.bigBrushHighlight = this.geometryCreator.getBrickBox(
-        dimensions as any,
+        size,
         material,
       ) as ExtendedMesh
       this.brickShadowThreeNode.add(this.bigBrushHighlight)

@@ -1,22 +1,25 @@
-import THREE, { Object3D, Mesh, Geometry, LineSegments, Vector3 } from "three"
+import THREE, { Object3D, Mesh, Geometry, LineSegments, Vector3, PerspectiveCamera } from "three"
 
 import VoxelUnion from "../../csg/VoxelUnion.js"
 import * as interactionHelper from "../../../client/interactionHelper.js"
 import type Grid from "../../newBrickator/pipeline/Grid.js"
 import type Coloring from "./Coloring.js"
 
-interface Bundle {
-  renderer: unknown
+interface BrickifyRenderer {
+  getCamera(): PerspectiveCamera
+  getDomElement(): HTMLCanvasElement
 }
 
-interface Position {
+interface Bundle {
+  renderer: BrickifyRenderer
+}
+
+interface VoxelInput {
   x: number
   y: number
   z: number
-}
-
-interface VoxelLike {
-  position: Position
+  studOnTop?: boolean
+  studFromBelow?: boolean
 }
 
 interface Intersection {
@@ -65,7 +68,7 @@ export default class VoxelOutline {
   // creates a wireframe out of voxels
   // @param {Array} voxels array of voxels {x, y, z}[] to create
   // wireframe for
-  createWireframe (voxels: VoxelLike[]): LineSegments | undefined {
+  createWireframe (voxels: VoxelInput[]): LineSegments | undefined {
     // clear old representations
     this.threeNode.children = []
 
@@ -73,7 +76,7 @@ export default class VoxelOutline {
     const options = {
       threeBoxGeometryOnly: true,
     }
-    const boxGeometry = this.voxelUnion.run(voxels as any, options) as Geometry
+    const boxGeometry = this.voxelUnion.run(voxels, options) as Geometry
 
     // add black sides to make volume more visible
     const shadowBox = new THREE.Mesh(boxGeometry, this.coloring.legoShadowMat)
@@ -109,7 +112,7 @@ export default class VoxelOutline {
     const intersects =
       interactionHelper.getIntersections(
         event,
-        this.bundle.renderer as any,
+        this.bundle.renderer,
         [intersectObject],
       )
 

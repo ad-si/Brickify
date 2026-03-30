@@ -5,7 +5,7 @@ window.jQuery = window.$ = $
 
 // THREE is provided via ESM import and exposed globally for legacy plugins
 import THREE from "three"
-window.THREE = THREE as any
+window.THREE = THREE
 
 // Import bootbox after jQuery is available on window
 // bootbox needs window.jQuery to be set before it initializes

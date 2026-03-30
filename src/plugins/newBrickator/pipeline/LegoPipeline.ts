@@ -1,6 +1,6 @@
 import log from "loglevel"
 
-import HullVoxelizer from "./voxelization/HullVoxelizer.js"
+import HullVoxelizer, { type Model, type VoxelizeOptions } from "./voxelization/HullVoxelizer.js"
 import VolumeFiller from "./voxelization/VolumeFiller.js"
 import BrickLayouter from "./Layout/BrickLayouter.js"
 import PlateLayouter from "./Layout/PlateLayouter.js"
@@ -62,10 +62,10 @@ export default class LegoPipeline {
       },
       worker: (lastResult: PipelineData, options: PipelineOptions, progressCallback: ProgressCallback) => {
         return this.voxelizer.voxelize(
-          lastResult.optimizedModel as any,
-          options as any,
+          lastResult.optimizedModel as Model,
+          options as VoxelizeOptions,
           progressCallback,
-        ) as any
+        ) as Promise<PipelineData>
       },
     })
 
@@ -90,9 +90,9 @@ export default class LegoPipeline {
       decision (options: PipelineOptions) {
         return options.initLayout ?? false
       },
-      worker: (lastResult: PipelineData, _options: PipelineOptions, _progressCallback: ProgressCallback): Promise<any> => {
+      worker: (lastResult: PipelineData, _options: PipelineOptions, _progressCallback: ProgressCallback): Promise<PipelineData> => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return lastResult.grid!.initializeBricks() as any
+        return lastResult.grid!.initializeBricks() as unknown as Promise<PipelineData>
       },
     })
 
@@ -146,9 +146,9 @@ export default class LegoPipeline {
       decision (options: PipelineOptions) {
         return (options.layouting ?? false) || (options.reLayout ?? false)
       },
-      worker: (lastResult: PipelineData, _options: PipelineOptions): Promise<any> => {
+      worker: (lastResult: PipelineData, _options: PipelineOptions): Promise<PipelineData> => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return this.layoutOptimizer.optimizeLayoutStability(lastResult.grid!) as any
+        return this.layoutOptimizer.optimizeLayoutStability(lastResult.grid!) as unknown as Promise<PipelineData>
       },
     })
   }

@@ -5,6 +5,7 @@ import LegoPipeline from "./pipeline/LegoPipeline.js"
 import PipelineSettings from "./pipeline/PipelineSettings.js"
 import Brick from "./pipeline/Brick.js"
 import * as threeHelper from "../../client/threeHelper.js"
+import type { Transform } from "../../types/index.js"
 import * as threeConverter from "../../client/threeConverter.js"
 import type Voxel from "./pipeline/Voxel.js"
 import type Grid from "./pipeline/Grid.js"
@@ -31,6 +32,8 @@ interface CsgPlugin {
 }
 
 interface Node {
+  id: string
+  transform: Transform
   getModel: () => Promise<Model>
   getPluginData: (name: string) => Promise<CachedData | null>
   storePluginData: (name: string, data: CachedData, flag: boolean) => void
@@ -69,6 +72,12 @@ interface FaceVertexMesh {
   vertexCoordinates: number[]
   faceVertexIndices: number[]
   name?: string
+}
+
+interface StlFaceVertexMesh {
+  name?: string
+  vertices: number[]
+  faces: number[]
 }
 
 /*
@@ -128,7 +137,7 @@ export default class NewBrickator {
           const settings = new PipelineSettings(this.bundle.globalConfig)
           settings.deactivateVoxelizing()
 
-          settings.setModelTransform(threeHelper.getTransformMatrix(selectedNode as any))
+          settings.setModelTransform(threeHelper.getTransformMatrix(selectedNode))
 
           const data = {
             optimizedModel: cachedData.optimizedModel,
@@ -205,7 +214,7 @@ export default class NewBrickator {
       .then((model: Model) => {
       // Create grid
         const settings = new PipelineSettings(this.bundle.globalConfig)
-        settings.setModelTransform(threeHelper.getTransformMatrix(selectedNode as any))
+        settings.setModelTransform(threeHelper.getTransformMatrix(selectedNode))
 
         return this.pipeline.run(
           {optimizedModel: model},
@@ -278,18 +287,18 @@ export default class NewBrickator {
             .getName()
             .then((name: string) => {
 
-              const results = csgGeometries.map((threeGeometry: any, index: number) => {
+              const results = csgGeometries.map((threeGeometry: unknown, index: number) => {
 
                 const fileName = "brickify-" +
               name.replace(/.stl$/, `-${String(index)}.stl`)
 
                 const faceVertexMesh = threeConverter
-                  .threeGeometryToFaceVertexMesh(threeGeometry) as FaceVertexMesh
+                  .threeGeometryToFaceVertexMesh(threeGeometry as import("three").Geometry) as FaceVertexMesh
 
                 faceVertexMesh.name = name
 
                 return {
-                  data: stlExporter.toBinaryStl(faceVertexMesh as any),
+                  data: stlExporter.toBinaryStl(faceVertexMesh as unknown as StlFaceVertexMesh[]),
                   fileName,
                 }
               })

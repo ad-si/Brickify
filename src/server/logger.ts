@@ -1,4 +1,19 @@
-import winston from "winston"
+import type Winston from "winston"
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const winston = require("winston") as {
+  transports: { Console: new (opts: unknown) => unknown }
+  format: {
+    combine: (...formats: unknown[]) => unknown
+    colorize: () => unknown
+    simple: () => unknown
+  }
+  configure: (opts: unknown) => void
+  loggers: {
+    add: (name: string, opts: unknown) => void
+    get: (name: string) => Winston.Logger
+  }
+}
 
 const loggingLevel = "warn"
 

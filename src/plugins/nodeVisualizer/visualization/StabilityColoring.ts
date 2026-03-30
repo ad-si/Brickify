@@ -1,6 +1,29 @@
 import { MeshLambertMaterial } from "three"
 import Coloring from "./Coloring.js"
 
+interface StabilityBrick {
+  getStability: () => number
+  getNeighborsXY: () => Set<StabilityBrick>
+  connectedBricks: () => Set<StabilityBrick>
+  getVisualBrick: () => { textureMaterial?: MeshLambertMaterial } | null
+  getSize: () => { x: number; y: number }
+  visualizationMaterials?: {
+    color: MeshLambertMaterial
+    colorStuds: MeshLambertMaterial
+    gray: MeshLambertMaterial
+    grayStuds: MeshLambertMaterial
+    textureStuds?: MeshLambertMaterial
+  }
+}
+
+interface StabilityMaterialSet {
+  color: MeshLambertMaterial
+  colorStuds: MeshLambertMaterial
+  gray: MeshLambertMaterial
+  grayStuds: MeshLambertMaterial
+  textureStuds: MeshLambertMaterial
+}
+
 export default class StabilityColoring extends Coloring {
   _stabilityMaterials: MeshLambertMaterial[]
 
@@ -31,11 +54,14 @@ export default class StabilityColoring extends Coloring {
     })()
   }
 
-  getMaterialsForBrick (brick: any): any {
+  getMaterialsForBrick (brick: StabilityBrick): StabilityMaterialSet {
     const index = Math.round(brick.getStability() * 19)
+    const material = this._stabilityMaterials[index]
     return {
-      color: this._stabilityMaterials[index],
-      colorStuds: this._stabilityMaterials[index],
+      color: material,
+      colorStuds: material,
+      gray: material,
+      grayStuds: material,
       textureStuds: this.getTextureMaterialForBrick(brick),
     }
   }

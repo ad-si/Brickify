@@ -21,7 +21,7 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
       self.postMessage(message)
     }
     try {
-      VolumeFillWorker.fillGrid(gridPOJO as any, callback)
+      VolumeFillWorker.fillGrid(gridPOJO as import("./VolumeFillWorker.js").VoxelGrid, callback)
     } catch (err) {
       const errorMessage = (err instanceof Error) ? err.message : String(err)
       self.postMessage({ state: 'error', error: errorMessage })

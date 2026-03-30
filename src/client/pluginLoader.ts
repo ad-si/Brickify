@@ -9,7 +9,7 @@ import hooks from "./pluginHooks.yaml"
 import PluginHooks from "../common/pluginHooks.js"
 import type Bundle from "./bundle.js"
 import type { GlobalConfig } from "../types/index.js"
-import type { Plugin } from "../types/plugin.js"
+import type { Plugin, PluginConstructor, PluginPackageJson } from "../types/plugin.js"
 
 export default class PluginLoader {
   bundle: Bundle
@@ -25,12 +25,12 @@ export default class PluginLoader {
     this.globalConfig = this.bundle.globalConfig
   }
 
-  _loadPlugin (PluginClass: any, packageData: any): Plugin {
-    const instance = new PluginClass()
+  _loadPlugin (PluginClass: PluginConstructor, packageData: PluginPackageJson): Plugin {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const instance: Plugin = new PluginClass()
 
-    for (const key of Object.keys(packageData || {})) {
-      const value = packageData[key]
-      instance[key] = value
+    for (const key of Object.keys(packageData)) {
+      (instance as Record<string, unknown>)[key] = (packageData as unknown as Record<string, unknown>)[key]
     }
 
     return instance

@@ -9,9 +9,9 @@ declare global {
     clone: <T>(obj: T) => T;
     saveAs: (blob: Blob, filename: string) => void;
     Nanobar: any;
-    path: any;
+    path: typeof import('path-browserify').default;
     ZeroClipboard: any;
-    THREE: any;
+    THREE: typeof import('three').default;
   }
 
   const bootbox: Bootbox;

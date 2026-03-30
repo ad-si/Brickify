@@ -6,6 +6,7 @@ import PointEventHandler from "./pointEventHandler.js"
 import * as pointerEnums from "../../client/ui/pointerEnums.js"
 
 interface NodeVisualizer extends Plugin {
+  selectedNode: Node;
   pointerOverModel(event: PointerEvent, ignoreInvisible: boolean): boolean;
   setDisplayMode(node: Node, mode: string): void;
 }
@@ -37,17 +38,26 @@ export default class EditController {
     this.nodeVisualizer = this.bundle.getPlugin("nodeVisualizer") as NodeVisualizer
     this.newBrickator = this.bundle.getPlugin("newBrickator") as NewBrickator
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
     this.brushHandler = new BrushHandler(this.bundle, this.nodeVisualizer as any, this)
+
+    const ui = this.bundle.ui
+    if (ui == null) {
+      throw new Error("UI is not initialized")
+    }
 
     const {
       brushUi,
-    } = (this.bundle.ui as any).workflowUi.workflow.edit
-    brushUi.setBrushes(this.brushHandler.getBrushes())
+    } = ui.workflowUi.workflow.edit
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+    brushUi.setBrushes(this.brushHandler.getBrushes() as any)
 
-    return this.pointEventHandler = new PointEventHandler(
+    this.pointEventHandler = new PointEventHandler(
       this.bundle.sceneManager,
-      brushUi,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+      brushUi as any,
     )
+    return this.pointEventHandler
   }
 
   // Disables any brush interaction for the user

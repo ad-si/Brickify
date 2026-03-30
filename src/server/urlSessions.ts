@@ -25,7 +25,7 @@ export function middleware (request: Request, response: Response, next: NextFunc
     // do we have a cookie that indicates a session?
   }
   else if (request.cookies.s != null) {
-    sessionId = request.cookies.s
+    sessionId = String(request.cookies.s)
     checkSession(sessionId, request, response, next)
       return
     // no session indication -> create a new session

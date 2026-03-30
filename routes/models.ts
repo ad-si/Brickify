@@ -32,7 +32,7 @@ export function get (request: Request<{ identifier: string }>, response: Respons
 
 export function store (request: Request<{ identifier: string }>, response: Response) {
   const { identifier } = request.params
-  const model = request.body
+  const model = request.body as string
 
   return storage.store(identifier, model)
     .then(() => response.status(200)

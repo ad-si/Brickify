@@ -3,7 +3,7 @@ interface VoxelData {
   z?: number
 }
 
-type VoxelGrid = (VoxelData | number | undefined)[][][]
+export type VoxelGrid = (VoxelData | number | undefined)[][][]
 
 interface ProgressMessage {
   state: "progress"
@@ -106,9 +106,9 @@ const VolumeFillWorker: VolumeFillWorkerType = {
       grid[x][y] = []
     }
     if (grid[x][y][z] == null) {
-      ;(grid[x][y] as any)[z] = undefined
+      grid[x][y][z] = undefined
     }
-    ;(grid[x][y] as any)[z] = voxelData
+    grid[x][y][z] = voxelData
   },
 
   _resetProgress () {

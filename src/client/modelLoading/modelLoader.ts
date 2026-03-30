@@ -4,6 +4,8 @@
 
 import log from "loglevel"
 
+import type { MeshlibModel } from "meshlib"
+
 import * as modelCache from "./modelCache.js"
 import Node from "../../common/project/node.js"
 import type Bundle from "../bundle.js"
@@ -23,14 +25,14 @@ export default class ModelLoader {
   loadByIdentifier (identifier: string) {
     return modelCache
       .request(identifier)
-      .then((model: any) => this._load(model, identifier))
+      .then((model) => this._load(model as MeshlibModel, identifier))
       .catch((error: unknown) => {
         log.error(`Could not load model ${identifier}`)
         log.error(error instanceof Error ? error.stack : String(error))
       })
   }
 
-  _load (model: any, identifier: string) {
+  _load (model: MeshlibModel, identifier: string) {
     return model
       .done()
       .then(() => {
@@ -40,7 +42,7 @@ export default class ModelLoader {
   }
 
   // adds a new model to the state
-  _addModelToScene (name: string, identifier: string, model: any) {
+  _addModelToScene (name: string, identifier: string, model: MeshlibModel) {
     return model
       .getAutoAlignMatrix()
       .then((matrix: number[][] | undefined) => {

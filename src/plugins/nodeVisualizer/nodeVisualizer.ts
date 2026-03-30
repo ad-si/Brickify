@@ -20,7 +20,8 @@ interface Bundle {
     getDefaultScene: () => Scene
     zoomToNode: (node: Object3D) => void
     getCamera: () => PerspectiveCamera
-    getDomElement?: () => HTMLElement
+    getDomElement: () => HTMLCanvasElement
+    scene: { matrix: import("three").Matrix4 }
   }
   getPlugin: (name: string) => unknown
 }

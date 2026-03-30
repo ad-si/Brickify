@@ -7,14 +7,13 @@
 
 import $ from "jquery"
 import type Bundle from "../../client/bundle.js"
-
-interface PluginHooks {
-  setFidelity(level: number, levels: string[], options: FidelityOptions): void;
-}
+import type PluginHooksClass from "../../common/pluginHooks.js"
 
 interface FidelityOptions {
   screenshotMode?: boolean;
 }
+
+type SetFidelityFn = (level: number, levels: string[], options: FidelityOptions) => void
 
 const minimalAcceptableFps = 20
 const upgradeThresholdFps = 40
@@ -39,7 +38,7 @@ export default class FidelityControl {
   static minimalPipelineLevel: number = FidelityControl.fidelityLevels.indexOf("PipelineLow")
 
   bundle!: Bundle
-  pluginHooks!: PluginHooks
+  pluginHooks!: PluginHooksClass
   currentFidelityLevel: number = 0
   autoAdjust: boolean = true
   screenShotMode: boolean = false
@@ -73,7 +72,6 @@ export default class FidelityControl {
 
   init (bundle: Bundle) {
     this.bundle = bundle
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.pluginHooks = this.bundle.pluginHooks
 
     this.currentFidelityLevel = 0
@@ -188,7 +186,7 @@ export default class FidelityControl {
   }
 
   _setFidelity (): void {
-    this.pluginHooks.setFidelity(
+    ;(this.pluginHooks as unknown as { setFidelity: SetFidelityFn }).setFidelity(
       this.currentFidelityLevel, FidelityControl.fidelityLevels, {},
     )
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
@@ -266,7 +264,7 @@ export default class FidelityControl {
     this.currentFidelityLevel = level
 
     /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
-    this.pluginHooks.setFidelity(
+    ;(this.pluginHooks as unknown as { setFidelity: SetFidelityFn }).setFidelity(
       level, FidelityControl.fidelityLevels,
       {screenshotMode: true},
     )
@@ -284,7 +282,7 @@ export default class FidelityControl {
     this.currentFidelityLevel = this._levelBeforeScreenshot
 
     /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
-    this.pluginHooks.setFidelity(
+    ;(this.pluginHooks as unknown as { setFidelity: SetFidelityFn }).setFidelity(
       this.currentFidelityLevel, FidelityControl.fidelityLevels,
       {screenshotMode: false},
     )

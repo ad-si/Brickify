@@ -2,4 +2,4 @@
 import winston from "winston"
 const logger = winston.loggers.get("log")
 
-module.exports.init = () => { logger.debug("Dummy Server Folder-Plugin initialization") }
+export const init = () => { logger.debug("Dummy Server Folder-Plugin initialization") }

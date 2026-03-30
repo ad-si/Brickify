@@ -22,7 +22,7 @@ interface Model {
   getBoundingBox: () => Promise<{ min: Point3D; max: Point3D }>
 }
 
-interface SetupOptions {
+export interface SetupOptions {
   modelTransform?: Matrix4
 }
 

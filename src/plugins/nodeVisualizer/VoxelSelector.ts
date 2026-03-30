@@ -1,4 +1,4 @@
-import THREE, { Vector3, Matrix4 } from "three"
+import THREE, { Matrix4, PerspectiveCamera } from "three"
 
 import * as interactionHelper from "../../client/interactionHelper.js"
 import type Grid from "../newBrickator/pipeline/Grid.js"
@@ -17,7 +17,8 @@ interface PseudoVoxel {
 }
 
 interface Renderer {
-  getCamera: () => { position: Vector3 }
+  getCamera: () => PerspectiveCamera
+  getDomElement: () => HTMLCanvasElement
   scene: { matrix: Matrix4 }
 }
 
@@ -141,7 +142,7 @@ export default class VoxelSelector {
     const levelWorldPosition = this.grid.mapVoxelToWorld({x: 0, y: 0, z: this.level!}).z
     const position = interactionHelper.getPlanePosition(
       event,
-      this.renderer as any,
+      this.renderer,
       levelWorldPosition,
     )
 
@@ -184,7 +185,7 @@ export default class VoxelSelector {
   }
 
   _getBaseplateVoxel (event: PointerEvent, type: string): Voxel | null | undefined {
-    const baseplatePos = interactionHelper.getGridPosition(event, this.renderer as any)
+    const baseplatePos = interactionHelper.getGridPosition(event, this.renderer)
     const voxelPos = this.grid.mapGridToVoxel(this.grid.mapWorldToGrid(baseplatePos))
     const voxel = this.grid.getVoxel(voxelPos.x, voxelPos.y, voxelPos.z)
     if (voxel == null) {
@@ -223,7 +224,7 @@ export default class VoxelSelector {
   }
 
   _getIntersections (event: PointerEvent): VoxelIntersection[] {
-    const rayDirection = interactionHelper.calculateRay(event, this.renderer as any)
+    const rayDirection = interactionHelper.calculateRay(event, this.renderer)
     const rayOrigin = this.renderer.getCamera().position.clone()
 
     return this.grid.intersectVoxels(rayOrigin, rayDirection)

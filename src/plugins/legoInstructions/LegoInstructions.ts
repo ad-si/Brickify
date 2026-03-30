@@ -11,6 +11,7 @@ import type { Plugin } from "../../types/plugin.js"
 import * as threeHelper from "../../client/threeHelper.js"
 import * as pieceListGenerator from "./PieceListGenerator.js"
 import generateScad from "./OpenScadGenerator.js"
+import type Brick from "../newBrickator/pipeline/Brick.js"
 
 interface Renderer {
   camera: PerspectiveCamera;
@@ -37,7 +38,7 @@ interface FidelityControl extends Plugin {
 
 interface NodeData {
   grid: {
-    getAllBricks(): Set<unknown>;
+    getAllBricks(): Set<Brick>;
   };
 }
 
@@ -139,10 +140,10 @@ export default class LegoInstructions {
             }
 
             const files: FileData[] = []
-            files.push(generateScad([...bricks] as any))
+            files.push(generateScad([...bricks]))
 
             // add instructions html to download
-            const pieceList = pieceListGenerator.generatePieceList(bricks as any)
+            const pieceList = pieceListGenerator.generatePieceList(bricks)
             files.push(this._createHtml(numLayers, pieceList))
 
             // Take screenshots and convert them to png
@@ -177,10 +178,10 @@ export default class LegoInstructions {
     return this.newBrickator.getNodeData(node)
       .then((data: NodeData) => {
         const bricks = data.grid.getAllBricks()
-        const pieceList = pieceListGenerator.generatePieceList(bricks as any)
+        const pieceList = pieceListGenerator.generatePieceList(bricks)
         const pieceListHtml = pieceListGenerator.getHtml(pieceList, false)
 
-        return (window as any).bootbox.dialog({
+        return window.bootbox.dialog({
           title: "Parts needed",
           message: pieceListHtml,
           backdrop: true,
@@ -363,7 +364,7 @@ td{min-width: 80px;} \
         resolve({
           fileName,
           // as requested, response is an ArrayBuffer
-          data: this.response,
+          data: this.response as ArrayBuffer,
         })
       }
       xhr.onerror = reject

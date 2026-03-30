@@ -43,9 +43,9 @@ async function loadPlugin (directory: string): Promise<void> {
 
   log.info(`Loading plugin "${directory}" …`)
 
-  let instance
+  let instance: Record<string, unknown>
   try {
-    instance = await import(`${directory}/${path.basename(directory)}.js`)
+    instance = await import(`${directory}/${path.basename(directory)}.js`) as Record<string, unknown>
   }
   catch (error) {
     const code = (error as NodeError).code
@@ -57,9 +57,10 @@ async function loadPlugin (directory: string): Promise<void> {
   }
 
   // Merge the plugin module with package.json to ensure name/version are present
+  const pluginBase = (instance.default ?? instance) as Record<string, unknown>
   const fullInstance = Object.assign(
     {},
-    instance.default || instance,
+    pluginBase,
     { name: packageJson.name, version: packageJson.version },
   ) as Plugin
 

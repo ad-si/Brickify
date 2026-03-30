@@ -127,8 +127,7 @@ export default class BrickObject extends THREE.Object3D {
       this.disposableResource = null
 
       // Clear references
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(this as any).materials = null
+      this.materials = undefined as unknown as BrickMaterials
       this.brick = null
     }
   }

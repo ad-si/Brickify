@@ -6,8 +6,8 @@
 
 interface Packet {
   id: string
-  data: any
-  [key: string]: any
+  data: Record<string, unknown>
+  [key: string]: unknown
 }
 
 const STORAGE_KEY = 'brickify_datapackets'
@@ -19,7 +19,7 @@ function generateId(): string {
 function getStorage(): Partial<Record<string, Packet>> {
   try {
     const data = localStorage.getItem(STORAGE_KEY)
-    return data ? JSON.parse(data) : {}
+    return data ? JSON.parse(data) as Partial<Record<string, Packet>> : {}
   } catch {
     return {}
   }

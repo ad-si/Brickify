@@ -5,11 +5,11 @@ const voxelRoundingThreshold = 1e-5
 
 import HullVoxelWorker from "./HullVoxelWorker.js"
 
-interface VoxelizeOptions {
+export interface VoxelizeOptions {
   accuracy?: number
   zTolerance?: number
   gridSpacing?: { x: number; y: number; z: number }
-  modelTransform?: unknown
+  modelTransform?: import("three").Matrix4
 }
 
 interface FaceVertexMesh {
@@ -18,7 +18,7 @@ interface FaceVertexMesh {
   faceNormalCoordinates: number[]
 }
 
-interface Model {
+export interface Model {
   getFaceVertexMesh: () => Promise<FaceVertexMesh>
   getBoundingBox: () => Promise<{ min: { x: number; y: number; z: number }; max: { x: number; y: number; z: number } }>
 }
@@ -237,7 +237,7 @@ export default class Voxelizer {
     this.voxelGrid = new Grid(options.gridSpacing)
 
     return this.voxelGrid
-      .setUpForModel(model, options as any)
+      .setUpForModel(model, options as import("../Grid.js").SetupOptions)
       .then(() => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return this.voxelGrid!

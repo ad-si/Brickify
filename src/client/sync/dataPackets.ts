@@ -7,11 +7,9 @@
 import * as cache from "./dataPacketsCache"
 import * as proxy from "./dataPacketsProxy"
 
-interface Packet {
-  id: string
-  data: Record<string, unknown>
-  [key: string]: any
-}
+import type { DataPacket } from "../../common/sync/syncObject"
+
+type Packet = DataPacket
 
 export const create = (): Promise<Packet> => proxy.create()
   .then(cache.create)

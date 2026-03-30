@@ -381,7 +381,21 @@ declare module 'es6-collections-iterators' {
 }
 
 declare module 'path-browserify' {
-  const path: any;
+  interface Path {
+    resolve(...paths: string[]): string;
+    normalize(p: string): string;
+    isAbsolute(p: string): boolean;
+    join(...paths: string[]): string;
+    relative(from: string, to: string): string;
+    dirname(p: string): string;
+    basename(p: string, ext?: string): string;
+    extname(p: string): string;
+    parse(p: string): { root: string; dir: string; base: string; ext: string; name: string };
+    format(pathObject: { root?: string; dir?: string; base?: string; ext?: string; name?: string }): string;
+    sep: string;
+    delimiter: string;
+  }
+  const path: Path;
   export default path;
 }
 

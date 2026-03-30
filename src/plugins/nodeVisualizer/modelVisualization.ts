@@ -1,7 +1,7 @@
 import THREE, { Object3D, Mesh, Material, BufferGeometry, Geometry } from "three"
 import * as threeHelper from "../../client/threeHelper.js"
 import * as threeConverter from "../../client/threeConverter.js"
-import type { GlobalConfig } from "../../types/index.js"
+import type { GlobalConfig, Transform } from "../../types/index.js"
 import type Coloring from "./visualization/Coloring.js"
 
 interface ExtendedThreeNode extends Object3D {
@@ -9,11 +9,24 @@ interface ExtendedThreeNode extends Object3D {
   wireframe?: Object3D
 }
 
+interface ModelObject {
+  mesh: {
+    faceVertex: {
+      vertexCoordinates: number[]
+      faceVertexIndices: number[]
+      faceNormalCoordinates?: number[]
+      vertexNormalCoordinates?: number[]
+    }
+  }
+}
+
 interface Model {
-  getObject: () => Promise<Mesh>
+  getObject: () => Promise<ModelObject>
 }
 
 interface NodeType {
+  id: string
+  transform: Transform
   getModel: () => Promise<Model>
 }
 
@@ -103,8 +116,8 @@ export default class ModelVisualization {
     const _addModel = (model: Model): Promise<void> => {
       return model
         .getObject()
-        .then((modelObject: Mesh) => {
-          const geometry = threeConverter.toStandardGeometry(modelObject as any)
+        .then((modelObject: ModelObject) => {
+          const geometry = threeConverter.toStandardGeometry(modelObject)
 
           if (this.globalConfig.rendering.showModel) {
             _addSolid(geometry, this.threeNode)
@@ -113,7 +126,7 @@ export default class ModelVisualization {
             _addWireframe(geometry, this.threeNode)
           }
 
-          threeHelper.applyNodeTransforms(node as any, this.threeNode)
+          threeHelper.applyNodeTransforms(node, this.threeNode)
         })
     }
 

@@ -44,9 +44,23 @@ interface GlobalConfig {
   controls: Record<string, unknown>;
 }
 
-// Type for pointer controls - uses 'any' for compatibility with three-pointer-controls library
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type PointerControls = any
+// Interface for pointer controls from three-pointer-controls library
+interface PointerControlsInstance {
+  config: {
+    enabled: boolean;
+    [key: string]: unknown;
+  };
+  target: THREE.Vector3;
+  control(camera: PerspectiveCamera): {
+    with(domElement: HTMLCanvasElement): void;
+  };
+  set(options: { target: THREE.Vector3; position: THREE.Vector3 }): void;
+}
+
+// Constructor type returned by threePointerControls(THREE)
+interface PointerControlsConstructor {
+  new (): PointerControlsInstance;
+}
 
 // Type for render target descriptor
 interface RenderTargetDescriptor {
@@ -98,9 +112,9 @@ export default class Renderer {
   private staticRendererHeight: number
   private devicePixelRatio: number
   private globalConfig!: GlobalConfig
-  private controls!: PointerControls
+  private controls!: PointerControlsInstance
 
-  constructor (pluginHooks: PluginHooks, globalConfig: GlobalConfig, controls?: PointerControls) {
+  constructor (pluginHooks: PluginHooks, globalConfig: GlobalConfig, controls?: PointerControlsInstance) {
     this.renderToImage = this.renderToImage.bind(this)
     this.localRenderer = this.localRenderer.bind(this)
     this._renderFrame = this._renderFrame.bind(this)
@@ -411,7 +425,7 @@ export default class Renderer {
     threeHelper.zoomToBoundingSphere(this.camera, this.scene, this.controls, boundingSphere)
   }
 
-  init (globalConfig: GlobalConfig, controls?: PointerControls): number {
+  init (globalConfig: GlobalConfig, controls?: PointerControlsInstance): number {
     this.globalConfig = globalConfig
     this._setupSize(this.globalConfig)
     this._setupRenderer(this.globalConfig)
@@ -510,10 +524,10 @@ Rendering will be (partly) broken",
     this.camera.lookAt(new THREE.Vector3(0, 0, 0))
   }
 
-  _setupControls (globalConfig: GlobalConfig, controls?: PointerControls): PointerControls {
+  _setupControls (globalConfig: GlobalConfig, controls?: PointerControlsInstance): PointerControlsInstance {
     if (!controls) {
-      const PointerControls = threePointerControls(THREE)
-      controls = new PointerControls()
+      const Ctor = threePointerControls(THREE) as unknown as PointerControlsConstructor
+      controls = new Ctor()
       extend(true, controls.config, globalConfig.controls)
     }
     return this.controls = controls
@@ -524,8 +538,7 @@ Rendering will be (partly) broken",
       .with(this.threeRenderer.domElement)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-  getControls (): PointerControls | null {
+  getControls (): PointerControlsInstance | null {
     return this.controls
   }
 

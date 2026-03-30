@@ -28,7 +28,6 @@ export default class SceneManager {
     this._deleteCurrentNode = this._deleteCurrentNode.bind(this)
     this.bundle = bundle
     this.selectedNode = null
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.pluginHooks = this.bundle.pluginHooks
     this.project = Project.load()
     this.scene = this.project.then(project => project.getScene())

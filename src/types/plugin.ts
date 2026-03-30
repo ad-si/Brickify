@@ -62,9 +62,8 @@ export interface PluginPackageJson {
   browser?: string;
 }
 
-export interface PluginConstructor {
-  new (): Plugin;
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type PluginConstructor = new () => any
 
 export interface PluginModule {
   default: PluginConstructor;

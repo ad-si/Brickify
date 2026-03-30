@@ -79,14 +79,14 @@ export default class CsgExtractor {
     }
 
     d = new Date()
-    const voxunion = new VoxelUnion(grid as any)
+    const voxunion = new VoxelUnion(grid as unknown as ConstructorParameters<typeof VoxelUnion>[0])
     const voxelHull = voxunion.run(gridAnalysis.legoVoxels, options)
     log.debug(`Voxel Geometrizer took ${String(+new Date() - +d)}ms`)
 
     const extraction = this._extractPrintGeometry(
-      options.modelBsp as any,
+      options.modelBsp,
       options.transformedModel,
-      voxelHull as any,
+      voxelHull as ThreeBSP,
     )
 
     return {

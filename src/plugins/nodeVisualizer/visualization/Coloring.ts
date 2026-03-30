@@ -138,7 +138,7 @@ export default class Coloring {
     this.objectLineMat.linewidth = 2
     this.objectLineMat.transparent = true
     this.objectLineMat.opacity = 0.1
-    this.objectLineMat.depthFunc = (THREE as any).GreaterDepth
+    this.objectLineMat.depthFunc = (THREE as unknown as { GreaterDepth: number }).GreaterDepth
     this.objectLineMat.depthWrite = false
 
     this._brickMaterials = []
@@ -162,10 +162,10 @@ export default class Coloring {
     this.objectLineMat.transparent = !enabled
     this.objectLineMat.depthWrite = enabled
     if (enabled) {
-      this.objectLineMat.depthFunc = (THREE as any).LessEqualDepth
+      this.objectLineMat.depthFunc = (THREE as unknown as { LessEqualDepth: number }).LessEqualDepth
     }
     else {
-      this.objectLineMat.depthFunc = (THREE as any).GreaterDepth
+      this.objectLineMat.depthFunc = (THREE as unknown as { GreaterDepth: number }).GreaterDepth
     }
 
     this.legoBoxHighlightMaterial.transparent = !enabled

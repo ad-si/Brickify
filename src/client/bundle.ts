@@ -15,6 +15,7 @@ Node.modelProvider = modelCache
 import DownloadUi from "./ui/workflowUi/DownloadUi.js"
 import type { GlobalConfig } from "../types/index.js"
 import type { Plugin } from "../types/plugin.js"
+import PluginHooks from "../common/pluginHooks.js"
 
 /*
  * @class Bundle
@@ -22,7 +23,7 @@ import type { Plugin } from "../types/plugin.js"
 export default class Bundle {
   globalConfig: GlobalConfig
   pluginLoader: PluginLoader
-  pluginHooks: any
+  pluginHooks: PluginHooks
   modelLoader: ModelLoader
   sceneManager: SceneManager
   renderer: Renderer
@@ -30,7 +31,7 @@ export default class Bundle {
   ui?: Ui
   exportUi?: DownloadUi
 
-  constructor (globalConfig: GlobalConfig, controls?: any) {
+  constructor (globalConfig: GlobalConfig, controls?: unknown) {
     this.init = this.init.bind(this)
     this.getPlugin = this.getPlugin.bind(this)
     this.getControls = this.getControls.bind(this)
@@ -41,7 +42,11 @@ export default class Bundle {
     this.pluginHooks = this.pluginLoader.pluginHooks
     this.modelLoader = new ModelLoader(this)
     this.sceneManager = new SceneManager(this)
-    this.renderer = new Renderer(this.pluginHooks, this.globalConfig, controls)
+    this.renderer = new Renderer(
+      this.pluginHooks as unknown as ConstructorParameters<typeof Renderer>[0],
+      this.globalConfig,
+      controls as ConstructorParameters<typeof Renderer>[2]
+    )
     // Ensure pluginInstances exists early to avoid undefined iteration
     this.pluginInstances = []
     // Note: pluginInstances will be set by loadPlugins() method
@@ -74,7 +79,7 @@ export default class Bundle {
     return null
   }
 
-  getControls () {
+  getControls (): unknown {
     return this.renderer.getControls()
   }
 

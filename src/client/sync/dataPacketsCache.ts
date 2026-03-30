@@ -4,11 +4,9 @@
  * @module clientDataPacketsCache
  */
 
-interface Packet {
-  id: string
-  data: Record<string, unknown>
-  [key: string]: any
-}
+import type { DataPacket } from "../../common/sync/syncObject"
+
+type Packet = DataPacket
 
 // A map of promises that resolve to the respective packet or reject with its id
 let packets: Partial<Record<string, Promise<Packet>>> = {}

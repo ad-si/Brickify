@@ -65,10 +65,11 @@ export function safeGet<T, K extends string>(
   obj: T,
   key: K
 ): K extends keyof T ? T[K] : unknown {
+  type ReturnType = K extends keyof T ? T[K] : unknown
   if (isObject(obj) && key in obj) {
-    return obj[key] as any
+    return obj[key] as ReturnType
   }
-  return undefined as any
+  return undefined as ReturnType
 }
 
 /**

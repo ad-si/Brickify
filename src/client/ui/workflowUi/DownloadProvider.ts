@@ -81,10 +81,13 @@ export default class DownloadProvider {
       holeRadius: this.exportUi.holeRadius,
     }
 
-    const promisesArray = this.bundle.pluginHooks.getDownload(
+    const hooks = this.bundle.pluginHooks as Record<string, unknown>
+    const getDownload = hooks.getDownload as
+      ((node: Node, options: DownloadOptions) => unknown[]) | undefined
+    const promisesArray = (getDownload?.(
       selectedNode,
       downloadOptions,
-    )
+    ) ?? []) as Promise<DownloadFile[] | DownloadFile | null>[]
 
     return Promise
       .all(promisesArray)

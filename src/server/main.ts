@@ -64,11 +64,11 @@ export async function setupRouting (port: number | string): Promise<void> {
 
   webapp.use(compress())
 
-  webapp.use((stylus.middleware as any)({
+  webapp.use((stylus.middleware as (opts: unknown) => express.RequestHandler)({
     src: path.resolve(__dirname, "../../public"),
     dest: path.resolve(__dirname, "../../public"),
-    compile (str: string, filePath: string): any {
-      return stylus(str)
+    compile (str: string, filePath: string): unknown {
+      const s = stylus(str)
         .set("filename", filePath || "")
         .set("compress", !developmentMode)
         .set("sourcemap", developmentMode ? {
@@ -82,9 +82,10 @@ export async function setupRouting (port: number | string): Promise<void> {
           path.resolve(__dirname, "../../node_modules")
         ])
         .use(nib())
-        .use(bootstrap())
+      // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+      s.use(bootstrap())
       // Ugly because of github.com/LearnBoost/stylus/issues/1828
-        .define("backgroundColor", "#" + ("000000" +
+      return s.define("backgroundColor", "#" + ("000000" +
         globalConfig.colors.background.toString(16)).slice(-6))
     },
   }))
@@ -151,10 +152,9 @@ export async function setupRouting (port: number | string): Promise<void> {
     .delete(dataPackets.delete_)
 
   webapp.post("/updateGitAndRestart", jsonParser, (request, response): void => {
-    if (request.body.ref != null) {
-      const {
-        ref,
-      } = request.body
+    const body = request.body as Record<string, unknown>
+    if (body.ref != null) {
+      const ref = typeof body.ref === "string" ? body.ref : ""
       if (!((ref.indexOf("develop") >= 0) || (ref.indexOf("master") >= 0))) {
         log.debug('Got a server restart command, but "ref" ' +
           "did not contain develop or master",

@@ -148,7 +148,10 @@ export default class CSG {
         options.transformedModel = cachedData.transformedThreeGeometry
         options.modelBsp = cachedData.modelBsp
 
-        const result = this.csgExtractor.extractGeometry(cachedData.grid as any, options as any)
+        const result = this.csgExtractor.extractGeometry(
+          cachedData.grid as Parameters<CsgExtractor["extractGeometry"]>[0],
+          options as Parameters<CsgExtractor["extractGeometry"]>[1],
+        )
         cachedData.modelBsp = result.modelBsp
 
         options.split = true
@@ -171,8 +174,8 @@ export default class CSG {
 
       selectedNode.getModel()
         .then((model: { model: THREE.Object3D }) => {
-          const threeGeometry = threeConverter.toStandardGeometry(model.model as any)
-          threeGeometry.applyMatrix(threeHelper.getTransformMatrix(selectedNode as any))
+          const threeGeometry = threeConverter.toStandardGeometry(model.model as unknown as Parameters<typeof threeConverter.toStandardGeometry>[0])
+          threeGeometry.applyMatrix(threeHelper.getTransformMatrix(selectedNode as unknown as Parameters<typeof threeHelper.getTransformMatrix>[0]))
           resolve(threeGeometry)
         })
         .catch((error: unknown) => { reject(error instanceof Error ? error : new Error(String(error))) })

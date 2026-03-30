@@ -1,8 +1,8 @@
 import fs from "fs"
 import fsp from "fs-promise"
-import { mkdirp } from "mkdirp"
+import mkdirp from "mkdirp"
 import md5 from "blueimp-md5"
-import log from "winston"
+import log from "./logger.js"
 
 const cacheDirectory = "modelCache/"
 

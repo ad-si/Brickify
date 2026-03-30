@@ -45,7 +45,7 @@ export default class VolumeFiller {
               resolve({ grid })
             }
           }
-          VolumeFillWorker.fillGrid(gridPOJO as any, cb)
+          VolumeFillWorker.fillGrid(gridPOJO as import("./VolumeFillWorker.js").VoxelGrid, cb)
         })
       }
 
