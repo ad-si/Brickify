@@ -2,14 +2,14 @@
 var VolumeFillWorker = {
 	lastProgress: -1,
 	fillGrid(grid, callback) {
-		if (!grid || grid.length === 0) {
+		if (grid.length === 0) {
 			callback({
 				state: "finished",
-				data: grid ?? []
+				data: grid
 			});
 			return {
 				state: "finished",
-				data: grid ?? []
+				data: grid
 			};
 		}
 		const numVoxelsX = grid.length - 1;
