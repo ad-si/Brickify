@@ -91,7 +91,8 @@ export default class Hotkeys {
     return this.events[titlegroup].push({hotkey, description})
   }
 
-  addEvents (eventSpecs: HotkeyGroup): void {
+  addEvents (eventSpecs: HotkeyGroup | undefined | null): void {
+    if (eventSpecs == null) return
     eventSpecs.events
       .map((event: HotkeyEvent) =>
         this.bind(event.hotkey, eventSpecs.title, event.description, event.callback))
