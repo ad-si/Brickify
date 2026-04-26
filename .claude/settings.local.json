@@ -13,7 +13,9 @@
       "Bash(npx tsc:*)",
       "Bash(perl:*)",
       "Bash(python3 -c \":*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(git-surgeon hunks:*)",
+      "Bash(git-surgeon unstage:*)"
     ]
   },
   "enableAllProjectMcpServers": false
