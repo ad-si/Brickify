@@ -57,8 +57,10 @@ export default class Coloring {
   csgMaterial: MeshLambertMaterial
   legoShadowMat: MeshBasicMaterial
   objectPrintMaterial: MeshLambertMaterial
+  objectPrintMaterialBack: MeshLambertMaterial
   objectShadowMat: MeshBasicMaterial
   objectLineMat: LineBasicMaterial
+  objectLineMatFront: LineBasicMaterial
   legoHighlightMaterials?: HighlightMaterialSet
   printHighlightMaterials?: HighlightMaterialSet
   _brickMaterials: MeshLambertMaterial[]
@@ -116,14 +118,24 @@ export default class Coloring {
     })
     this._setPolygonOffset(this.legoShadowMat, 2, 2)
 
-    // printed object material
+    // Printed object material. We render the model in two passes — a back-
+    // facing mesh first, then the front-facing mesh — so that the model's
+    // own back surface is visible through the front when transparent. Each
+    // mesh writes depth, which the pipeline composite shader needs to
+    // distinguish "rendered" from "empty" pixels.
     this.objectPrintMaterial = this._createMaterial(
       this.globalConfig.colors.modelColor,
       this.globalConfig.colors.modelOpacity,
     )
+    this.objectPrintMaterial.transparent = true
+    this.objectPrintMaterial.side = THREE.FrontSide
+
+    this.objectPrintMaterialBack = this.objectPrintMaterial.clone()
+    this.objectPrintMaterialBack.side = THREE.BackSide
 
     // remove z-Fighting on baseplate
     this._setPolygonOffset(this.objectPrintMaterial, 3, 3)
+    this._setPolygonOffset(this.objectPrintMaterialBack, 3, 3)
 
     this.objectShadowMat = new THREE.MeshBasicMaterial({
       color: 0x000000,
@@ -131,15 +143,28 @@ export default class Coloring {
       opacity: 0.4,
       depthFunc: (THREE as unknown as { GreaterDepth: number }).GreaterDepth,
     })
+    this.objectShadowMat.depthWrite = false
+
     this._setPolygonOffset(this.objectShadowMat, 3, 3)
 
-    const lineMaterialGenerator = new LineMatGenerator()
-    this.objectLineMat = lineMaterialGenerator.generate(0x000000) as unknown as LineBasicMaterial
-    this.objectLineMat.linewidth = 2
-    this.objectLineMat.transparent = true
-    this.objectLineMat.opacity = 0.1
-    this.objectLineMat.depthFunc = (THREE as unknown as { GreaterDepth: number }).GreaterDepth
+    // Hidden-edge lines: drawn with AlwaysDepth + no depth write so they
+    // shine through the transparent model. Kept semi-transparent so the
+    // back edges read as a hint of internal structure rather than a
+    // dominating wireframe.
+    this.objectLineMat = new THREE.LineBasicMaterial({
+      color: 0x000000,
+      linewidth: 2,
+      transparent: true,
+      opacity: 0.5,
+    })
+    this.objectLineMat.depthFunc = (THREE as unknown as { AlwaysDepth: number }).AlwaysDepth
     this.objectLineMat.depthWrite = false
+
+    const lineMaterialGenerator = new LineMatGenerator()
+    this.objectLineMatFront = lineMaterialGenerator.generate(0x000000) as unknown as LineBasicMaterial
+    this.objectLineMatFront.linewidth = 2
+    this.objectLineMatFront.depthFunc = (THREE as unknown as { LessEqualDepth: number }).LessEqualDepth
+    this.objectLineMatFront.depthWrite = true
 
     this._brickMaterials = []
     this._studMaterials = []
@@ -156,21 +181,15 @@ export default class Coloring {
   }
 
   setPipelineMode (enabled: boolean): boolean {
-    this.objectPrintMaterial.transparent = !enabled
+    // objectPrintMaterial / objectPrintMaterialBack intentionally stay
+    // transparent in both modes — the back-then-front pass plus the
+    // composite shader's preserved per-pixel alpha lets the model's own
+    // back surface show through the front in either render path.
 
     this.objectShadowMat.visible = !enabled
-    this.objectLineMat.transparent = !enabled
-    this.objectLineMat.depthWrite = enabled
-    if (enabled) {
-      this.objectLineMat.depthFunc = (THREE as unknown as { LessEqualDepth: number }).LessEqualDepth
-    }
-    else {
-      this.objectLineMat.depthFunc = (THREE as unknown as { GreaterDepth: number }).GreaterDepth
-    }
 
     this.legoBoxHighlightMaterial.transparent = !enabled
     this.printBoxHighlightMaterial.transparent = !enabled
-    this.objectPrintMaterial.transparent = !enabled
     return this.legoShadowMat.transparent = !enabled
   }
 

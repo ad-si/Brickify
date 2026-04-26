@@ -107,7 +107,7 @@ float currentOpacity = opacity; \
 \n\
 " + inMain + "\
 \n \
-col.a = currentOpacity; \
+col.a *= currentOpacity; \
 gl_FragColor = col; \
 }\
 "

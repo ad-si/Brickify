@@ -19,9 +19,10 @@ uniform sampler2D tColor;\
   }
 
   getFragmentInMain () {
+    // Keep the alpha sampled from the source target so per-pixel transparency
+    // (e.g. for the transparent 3D model) survives compositing.
     return "\
 col = texture2D( tColor, vUv ); \
-col.a = 1.0; \
 \
 float depth = texture2D( tDepth, vUv ).r; \
 if (abs(1.0 - depth) < 0.00001){ \

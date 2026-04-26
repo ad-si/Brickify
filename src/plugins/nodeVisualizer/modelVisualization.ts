@@ -87,10 +87,36 @@ export default class ModelVisualization {
 
   _createVisualization (node: NodeType): Promise<void> {
 
+    const EdgesHelperCtor = (THREE as unknown as { EdgesHelper: new (mesh: Mesh, color: number, angle: number) => Object3D }).EdgesHelper
+
     const _addSolid = (geometry: BufferGeometry | Geometry, parent: ExtendedThreeNode): Mesh => {
+      // Render the model in two passes so its back surface is visible
+      // through the front when transparent. With sortObjects=false (set on
+      // the renderer) three.js uses scene-graph order, so adding the back
+      // mesh first ensures it renders before the front and the alpha-blend
+      // is correct.
+      const back = new THREE.Mesh(geometry, this.coloring.objectPrintMaterialBack)
+      parent.add(back)
+
       const solid = new THREE.Mesh(geometry, this.coloring.objectPrintMaterial)
       parent.add(solid)
       parent.solid = solid
+
+      // Hidden-edge lines: AlwaysDepth + no depth write so the model's
+      // edges shine through the transparent surface, not just the
+      // silhouette. Drawn before the front edges so the front edges sit
+      // crisply on top where they'd otherwise be obscured.
+      const hiddenLineObject = new THREE.Mesh(geometry)
+      const hiddenLines = new EdgesHelperCtor(hiddenLineObject, 0x000000, 30)
+      ;(hiddenLines as Mesh).material = this.coloring.objectLineMat
+      parent.add(hiddenLines)
+
+      // Front edges
+      const lineObject = new THREE.Mesh(geometry)
+      const lines = new EdgesHelperCtor(lineObject, 0x000000, 30)
+      ;(lines as Mesh).material = this.coloring.objectLineMatFront
+      parent.add(lines)
+
       return solid
     }
 
@@ -100,13 +126,6 @@ export default class ModelVisualization {
       // shadow
       const shadow = new THREE.Mesh(geometry, this.coloring.objectShadowMat)
       wireframe.add(shadow)
-
-      // visible black lines
-      const lineObject = new THREE.Mesh(geometry)
-      // EdgesHelper is from older THREE.js versions
-      const lines = new (THREE as unknown as { EdgesHelper: new (mesh: Mesh, color: number, angle: number) => Object3D }).EdgesHelper(lineObject, 0x000000, 30)
-      ;(lines as Mesh).material = this.coloring.objectLineMat
-      wireframe.add(lines)
 
       parent.add(wireframe)
       parent.wireframe = wireframe
@@ -119,11 +138,12 @@ export default class ModelVisualization {
         .then((modelObject: ModelObject) => {
           const geometry = threeConverter.toStandardGeometry(modelObject)
 
-          if (this.globalConfig.rendering.showModel) {
-            _addSolid(geometry, this.threeNode)
-          }
           if (this.globalConfig.rendering.showShadowAndWireframe) {
             _addWireframe(geometry, this.threeNode)
+          }
+
+          if (this.globalConfig.rendering.showModel) {
+            _addSolid(geometry, this.threeNode)
           }
 
           threeHelper.applyNodeTransforms(node, this.threeNode)
