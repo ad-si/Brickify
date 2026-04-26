@@ -55,6 +55,9 @@ export default class SceneManager {
       /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call */
       .then(() => __guardMethod__((this.bundle.ui as any)?.workflowUi, hook, (o, m) => o[m](node)))
       /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call */
+      .then(() => {
+        void this.bundle.renderer.render()
+      })
   }
 
   //

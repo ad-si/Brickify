@@ -20,7 +20,7 @@ import * as threeHelper from "../threeHelper.js"
 
 // Type for the plugin hooks system
 interface PluginHooks {
-  on3dUpdate(timestamp: number): void;
+  on3dUpdate(timestamp: number, lastFrameTime: number): unknown[];
   onPaint(
     renderer: WebGLRenderer,
     camera: PerspectiveCamera,
@@ -51,6 +51,7 @@ interface PointerControlsInstance {
     [key: string]: unknown;
   };
   target: THREE.Vector3;
+  update(): void;
   control(camera: PerspectiveCamera): {
     with(domElement: HTMLCanvasElement): void;
   };
@@ -90,6 +91,12 @@ interface ImageRenderResult {
 
 /*
  * @class Renderer
+ *
+ * On-demand rendering: instead of running an animation-frame loop forever,
+ * the renderer only schedules a frame when something asks for it via
+ * `render()`. Pointer interactions, scene mutations and the controls
+ * animation loop all wire into `render()`, so idle scenes don't burn power
+ * but anything that mutates state still produces a redraw.
  */
 export default class Renderer {
   private pluginHooks: PluginHooks
@@ -113,6 +120,10 @@ export default class Renderer {
   private devicePixelRatio: number
   private globalConfig!: GlobalConfig
   private controls!: PointerControlsInstance
+  private renderingEnabled: boolean
+  private lastFrameTime: number
+  private pendingRenderPromise: Promise<void> | null
+  private pendingRenderResolve: (() => void) | null
 
   constructor (pluginHooks: PluginHooks, globalConfig: GlobalConfig, controls?: PointerControlsInstance) {
     this.renderToImage = this.renderToImage.bind(this)
@@ -124,6 +135,8 @@ export default class Renderer {
     this.getControls = this.getControls.bind(this)
     this.getDefaultScene = this.getDefaultScene.bind(this)
     this.toggleRendering = this.toggleRendering.bind(this)
+    this.render = this.render.bind(this)
+    this.windowResizeHandler = this.windowResizeHandler.bind(this)
     this.pluginHooks = pluginHooks
     this.pipelineEnabled = false
     this.useBigRendertargets = false
@@ -140,6 +153,10 @@ export default class Renderer {
     this.staticRendererWidth = 0
     this.staticRendererHeight = 0
     this.devicePixelRatio = 1
+    this.renderingEnabled = true
+    this.lastFrameTime = 0
+    this.pendingRenderPromise = null
+    this.pendingRenderResolve = null
     this.init(globalConfig, controls)
   }
 
@@ -159,20 +176,49 @@ export default class Renderer {
     })
   }
 
-  localRenderer (timestamp: number): number {
+  // Schedules a single animation frame if none is already pending.
+  // Returns a Promise that resolves once that frame has rendered, so callers
+  // can chain follow-up work (and chain multiple `.then(render)` calls to
+  // request several consecutive frames).
+  render (): Promise<void> {
+    if (!this.renderingEnabled) {
+      return Promise.resolve()
+    }
+    if (this.pendingRenderPromise == null) {
+      this.pendingRenderPromise = new Promise((resolve) => {
+        this.pendingRenderResolve = resolve
+        this.animationRequestID = requestAnimationFrame(this.localRenderer)
+      })
+    }
+    return this.pendingRenderPromise
+  }
+
+  localRenderer (timestamp: number): void {
+    const startTime = (typeof performance !== "undefined") ? performance.now() : Date.now()
     this._updateSize()
 
-    if (this.imageRenderQueries.length === 0) {
-      this._renderFrame(timestamp, this.camera, null)
-    }
-    else {
+    const updateResults = this.pluginHooks.on3dUpdate(timestamp, this.lastFrameTime)
+    const pluginsRequestedRender =
+      Array.isArray(updateResults) && updateResults.some(Boolean)
+
+    if (this.imageRenderQueries.length > 0) {
       this._renderImage(timestamp)
     }
+    else {
+      this._renderFrame(timestamp, this.camera, null)
+    }
 
-    // call update hook
-    this.pluginHooks.on3dUpdate(timestamp)
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    return this.animationRequestID = requestAnimationFrame(this.localRenderer)
+    const resolve = this.pendingRenderResolve
+    this.pendingRenderPromise = null
+    this.pendingRenderResolve = null
+    this.lastFrameTime =
+      ((typeof performance !== "undefined") ? performance.now() : Date.now()) -
+      startTime
+    if (resolve != null) resolve()
+
+    if (pluginsRequestedRender || this.imageRenderQueries.length > 0) {
+      void this.render()
+    }
   }
 
   // Renders all plugins
@@ -350,6 +396,7 @@ export default class Renderer {
   }
 
   setFidelity (fidelityLevel: number, availableLevels: string[]): void {
+    void this.render()
     this.pipelineEnabled = fidelityLevel >= availableLevels.indexOf("PipelineLow")
 
     if (this.pipelineEnabled) {
@@ -399,6 +446,7 @@ export default class Renderer {
 
   addToScene (node: Object3D): void {
     this.scene.add(node)
+    void this.render()
   }
 
   getDomElement (): HTMLCanvasElement {
@@ -417,6 +465,7 @@ export default class Renderer {
     }
 
     this.threeRenderer.render(this.scene, this.camera)
+    void this.render()
   }
 
   zoomToNode (threeNode: Object3D): void {
@@ -425,7 +474,7 @@ export default class Renderer {
     threeHelper.zoomToBoundingSphere(this.camera, this.scene, this.controls, boundingSphere)
   }
 
-  init (globalConfig: GlobalConfig, controls?: PointerControlsInstance): number {
+  init (globalConfig: GlobalConfig, controls?: PointerControlsInstance): void {
     this.globalConfig = globalConfig
     this._setupSize(this.globalConfig)
     this._setupRenderer(this.globalConfig)
@@ -433,8 +482,11 @@ export default class Renderer {
     this._setupCamera(this.globalConfig)
     this._setupControls(this.globalConfig, controls)
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    return this.animationRequestID = requestAnimationFrame(this.localRenderer)
+    window.addEventListener("resize", this.windowResizeHandler)
+
+    // Render the initial frame so the canvas isn't blank before any
+    // interaction happens.
+    void this.render()
   }
 
   _setupSize (globalConfig: GlobalConfig): void {
@@ -485,6 +537,17 @@ Rendering will be (partly) broken",
     }
 
     this.threeRenderer.autoClear = false
+
+    // Any user input on the canvas should redraw — pointer-controls mutate
+    // the camera inside these handlers, and other listeners (brushes,
+    // hotkeys) may mutate scene state without explicitly calling render.
+    const canvas = this.threeRenderer.domElement
+    const requestFrame = () => { void this.render() }
+    canvas.addEventListener("pointerdown", requestFrame)
+    canvas.addEventListener("pointermove", requestFrame)
+    canvas.addEventListener("pointerup", requestFrame)
+    canvas.addEventListener("wheel", requestFrame, {passive: true})
+    window.addEventListener("keydown", requestFrame)
   }
 
   _updateSize (forceUpdate?: boolean): void {
@@ -530,6 +593,13 @@ Rendering will be (partly) broken",
       controls = new Ctor()
       extend(true, controls.config, globalConfig.controls)
     }
+    // Wrap controls.update so every camera mutation (pointer drag, wheel
+    // zoom, orbit/pan animations) requests a render.
+    const originalUpdate = controls.update.bind(controls)
+    controls.update = () => {
+      originalUpdate()
+      void this.render()
+    }
     return this.controls = controls
   }
 
@@ -567,15 +637,17 @@ Rendering will be (partly) broken",
   }
 
   toggleRendering (): boolean {
-    if (this.animationRequestID != null) {
+    this.renderingEnabled = !this.renderingEnabled
+    this.controls.config.enabled = this.renderingEnabled
+    if (this.renderingEnabled) {
+      void this.render()
+    }
+    else if (this.animationRequestID != null) {
       cancelAnimationFrame(this.animationRequestID)
       this.animationRequestID = null
-      return this.controls.config.enabled = false
+      this.pendingRenderPromise = null
+      this.pendingRenderResolve = null
     }
-    else {
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      this.animationRequestID = requestAnimationFrame(this.localRenderer)
-      return this.controls.config.enabled = true
-    }
+    return this.renderingEnabled
   }
 }

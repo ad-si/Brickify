@@ -27,13 +27,19 @@
 
 # ## 3D scene update and animation
 #
-# On each render frame the [renderer](render.html) will call the `on3dUpdate`
-# method of all plugins that provide it.
+# On each animation frame the [renderer](render.html) will call the
+# `on3dUpdate` method of all plugins that provide it.
 #
 # The callback has one single argument, a DOMHighResTimeStamp, which indicates
 # the current time for when requestAnimationFrame starts to fire callbacks.
 # (according to
 # https://developer.mozilla.org/en/docs/Web/API/window.requestAnimationFrame)
+#
+# Rendering is on-demand: a frame is drawn only when something requests
+# one. Plugins that mutate the scene from within `on3dUpdate` should
+# return a truthy value so a follow-up frame is scheduled. Plugins can
+# also call `bundle.renderer.render()` directly at any time to schedule
+# a frame.
 
 - on3dUpdate
 

@@ -14,7 +14,10 @@ export interface Plugin {
   // Event hooks
   onNodeAdd?(node: Node): void | Promise<void>;
   onNodeRemove?(node: Node): void | Promise<void>;
-  on3dUpdate?(timestamp: number): void;
+  // Return a truthy value (e.g. true) to signal that the scene was mutated
+  // and a re-render is required on the next frame. The second argument is
+  // the time the previous frame took to render, in milliseconds.
+  on3dUpdate?(timestamp: number, lastFrameTime: number): boolean | undefined;
   onPaint?(
     renderer: WebGLRenderer,
     camera: PerspectiveCamera,
