@@ -341,51 +341,6 @@ declare module 'path-browserify' {
   export default path;
 }
 
-declare module 'jszip' {
-  interface JSZipObject {
-    name: string;
-    dir: boolean;
-    date: Date;
-    comment: string;
-    async(type: 'string'): Promise<string>;
-    async(type: 'blob'): Promise<Blob>;
-    async(type: 'arraybuffer'): Promise<ArrayBuffer>;
-    async(type: 'uint8array'): Promise<Uint8Array>;
-    async(type: 'nodebuffer'): Promise<Buffer>;
-  }
-
-  interface JSZip {
-    file(name: string): JSZipObject | null;
-    file(regex: RegExp): JSZipObject[];
-    file(name: string, data: string | ArrayBuffer | Uint8Array | Blob | Promise<unknown>, options?: { binary?: boolean; base64?: boolean; date?: Date; compression?: string; comment?: string }): this;
-    folder(name: string): JSZip | null;
-    folder(regex: RegExp): JSZipObject[];
-    forEach(callback: (relativePath: string, file: JSZipObject) => void): void;
-    remove(name: string): this;
-    // Legacy sync generate method (used in older JSZip versions)
-    generate(options: { type: 'blob' }): Blob;
-    generate(options: { type: 'arraybuffer' }): ArrayBuffer;
-    generate(options: { type: 'uint8array' }): Uint8Array;
-    generate(options: { type: 'string' }): string;
-    generate(options: { type: 'base64' }): string;
-    generateAsync(options: { type: 'blob'; compression?: string; compressionOptions?: { level: number } }): Promise<Blob>;
-    generateAsync(options: { type: 'arraybuffer'; compression?: string; compressionOptions?: { level: number } }): Promise<ArrayBuffer>;
-    generateAsync(options: { type: 'uint8array'; compression?: string; compressionOptions?: { level: number } }): Promise<Uint8Array>;
-    generateAsync(options: { type: 'nodebuffer'; compression?: string; compressionOptions?: { level: number } }): Promise<Buffer>;
-    generateAsync(options: { type: 'string'; compression?: string; compressionOptions?: { level: number } }): Promise<string>;
-    generateAsync(options: { type: 'base64'; compression?: string; compressionOptions?: { level: number } }): Promise<string>;
-    loadAsync(data: ArrayBuffer | Uint8Array | string | Blob, options?: { optimizedBinaryString?: boolean; base64?: boolean; checkCRC32?: boolean; createFolders?: boolean }): Promise<JSZip>;
-  }
-
-  interface JSZipConstructor {
-    new (): JSZip;
-    loadAsync(data: ArrayBuffer | Uint8Array | string | Blob, options?: { optimizedBinaryString?: boolean; base64?: boolean; checkCRC32?: boolean; createFolders?: boolean }): Promise<JSZip>;
-  }
-
-  const JSZip: JSZipConstructor;
-  export default JSZip;
-}
-
 declare module 'stylus' {
   interface StylusRenderer {
     set(key: string, value: unknown): StylusRenderer;

@@ -132,10 +132,10 @@ export default class DownloadProvider {
                 }
               })
 
-              saveAs(
-                zip.generate({type: "blob"}),
-                `brickify-${selectedNode.name ?? ""}.zip`,
-              )
+              return zip.generateAsync({type: "blob"})
+            })
+            .then((zipBlob) => {
+              saveAs(zipBlob, `brickify-${selectedNode.name ?? ""}.zip`)
             })
 
         }
