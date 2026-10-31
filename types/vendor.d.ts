@@ -1,16 +1,3 @@
-declare module 'nanobar' {
-  interface NanobarOptions {
-    target?: HTMLElement;
-    id?: string;
-    classname?: string;
-  }
-
-  export default class Nanobar {
-    constructor(options?: NanobarOptions);
-    go(percentage: number): void;
-  }
-}
-
 declare module 'mousetrap' {
   type Callback = (e: KeyboardEvent, combo: string) => boolean | void;
 
@@ -124,40 +111,6 @@ declare module 'stl-exporter' {
   export function toAsciiStl(meshes: FaceVertexMesh[], name?: string): string;
 }
 
-declare module 'stl-parser' {
-  import { EventEmitter } from 'events';
-
-  interface ParsedStl {
-    vertices: Float32Array;
-    normals: Float32Array;
-  }
-
-  interface StlFace {
-    normal: [number, number, number];
-    vertices: [[number, number, number], [number, number, number], [number, number, number]];
-  }
-
-  interface StlModel {
-    faces: StlFace[];
-    name?: string;
-  }
-
-  interface StlParserOptions {
-    type?: 'binary' | 'ascii';
-  }
-
-  interface StlParserStream extends EventEmitter {
-    on(event: 'data', listener: (data: StlModel) => void): this;
-    on(event: 'error', listener: (error: Error) => void): this;
-    on(event: 'end', listener: () => void): this;
-    resume(): void;
-  }
-
-  function stlParser(buffer: Buffer, options?: StlParserOptions): StlParserStream;
-  export default stlParser;
-  export function parse(buffer: ArrayBuffer): ParsedStl;
-}
-
 declare module 'meshlib' {
   export interface Mesh {
     positions: Float32Array;
@@ -180,7 +133,7 @@ declare module 'meshlib' {
   }
 
   interface ModelStatic {
-    fromObject(obj: { mesh: unknown }): MeshlibModel;
+    fromObject(obj: { name?: string; fileName?: string; mesh: unknown }): MeshlibModel;
     fromBase64(base64: string): MeshlibModel;
   }
 

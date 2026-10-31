@@ -8,9 +8,7 @@ window.THREE = THREE
 
 import md5 from "blueimp-md5"
 import clone from "clone"
-import "es6-promise"
 import { saveAs } from "file-saver"
-import Nanobar from "nanobar"
 import "PEP"
 import path from "path-browserify"
 import "three-pointer-controls"
@@ -20,6 +18,5 @@ import ZeroClipboard from "zeroclipboard"
 window.md5 = md5
 window.clone = clone
 window.saveAs = saveAs
-window.Nanobar = Nanobar
 window.path = path
 window.ZeroClipboard = ZeroClipboard

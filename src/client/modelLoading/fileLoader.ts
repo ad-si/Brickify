@@ -1,21 +1,106 @@
-import { Buffer } from "buffer"
+import $ from "jquery"
 import log from "loglevel"
 import meshlib from "meshlib"
-import stlParser from "stl-parser"
 
 import * as modelCache from "./modelCache.js"
+import { loadStl } from "./StlLoaderClient.js"
 import * as Spinner from "../Spinner.js"
 import * as dialog from "../ui/dialog.js"
 import type { SpinnerOptions } from "../Spinner.js"
 
 const readingString = "Reading file"
+const parsingString = "Parsing file"
+const mergingString = "Building mesh"
+const encodingString = "Encoding mesh"
 const uploadString = "Uploading file"
 const loadedString = "File loaded!"
 const errorString = "Import failed!"
 
-export const onLoadFile = function (files: FileList, feedbackTarget: HTMLElement, spinnerOptions: SpinnerOptions) {
+// Shows the loading status as text next to a spinner in the target element
+class LoadingStatus {
+  private target: HTMLElement
+  private label: HTMLSpanElement
+
+  constructor (target: HTMLElement, spinnerOptions: SpinnerOptions) {
+    this.target = target
+    this.label = document.createElement("span")
+    target.textContent = ""
+    target.appendChild(this.label)
+    Spinner.start(target, spinnerOptions)
+  }
+
+  set (text: string, progress?: number) {
+    this.label.textContent = progress == null
+      ? text
+      : `${text} ${String(Math.round(progress * 100))}%`
+  }
+
+  finish (text: string) {
+    Spinner.stop(this.target)
+    this.label.textContent = text
+  }
+}
+
+const readFile = (
+  file: File,
+  onProgress: (progress: number) => void,
+): Promise<ArrayBuffer> => new Promise((resolve, reject) => {
+  const reader = new FileReader()
+  reader.onprogress = (event) => {
+    if (event.lengthComputable) onProgress(event.loaded / event.total)
+  }
+  reader.onload = () => { resolve(reader.result as ArrayBuffer) }
+  reader.onerror = () => { reject(reader.error ?? new Error("Reading the file failed")) }
+  reader.onabort = () => { reject(new Error("Reading the file was aborted")) }
+  reader.readAsArrayBuffer(file)
+})
+
+const loadFile = async function (
+  file: File,
+  status: LoadingStatus,
+): Promise<string> {
+  const buffer = await readFile(file, progress => {
+    status.set(readingString, progress)
+  })
+
+  const stl = await loadStl(buffer, file.name, (stage, progress) => {
+    if (stage === "parsing") status.set(parsingString, progress)
+    else if (stage === "merging") status.set(mergingString)
+    else status.set(encodingString)
+  })
+  log.debug(`Parsed ${file.name}: ` +
+    `${String(stl.faceVertexIndices.length / 3)} faces, ` +
+    `${String(stl.vertexCoordinates.length / 3)} vertices`)
+  stl.warnings.forEach(warning => { log.warn(warning) })
+
+  // Equal to the structure of models loaded from the server
+  const model = meshlib.Model
+    .fromObject({
+      name: file.name,
+      fileName: file.name,
+      mesh: {
+        faces: [],
+        faceVertex: {
+          vertexCoordinates: Array.from(stl.vertexCoordinates),
+          faceVertexIndices: Array.from(stl.faceVertexIndices),
+          vertexNormalCoordinates: Array.from(stl.vertexNormalCoordinates),
+          faceNormalCoordinates: Array.from(stl.faceNormalCoordinates),
+        },
+      },
+    })
+    .buildFacesFromFaceVertexMesh()
+
+  status.set(uploadString)
+  return modelCache.storeEncoded(model, stl.base64Model, stl.identifier)
+}
+
+export const onLoadFile = async function (
+  files: FileList,
+  feedbackTarget: HTMLElement,
+  spinnerOptions: SpinnerOptions,
+): Promise<string | undefined> {
   if (files.length < 1) {
-    return Promise.reject(new Error("No files provided"))
+    throw new Error("No files provided")
   }
 
   const file = files[0]
@@ -26,151 +111,29 @@ export const onLoadFile = function (files: FileList, feedbackTarget: HTMLElement
       message: "Only .stl files are supported at the moment. \
 We are working on adding more file formats",
     })
-    return Promise.reject(new Error("Wrong file format"))
+    throw new Error("Wrong file format")
   }
 
-  return loadFile(feedbackTarget, file, spinnerOptions)
-    .then(handleLoadedFile(feedbackTarget, file.name, spinnerOptions) as (value: ProgressEvent<FileReader>) => Promise<string>)
-    .catch((error: unknown): undefined => {
-      dialog.alert({
-        title: "Import failed",
-        message:
-          `<p>Your file contains errors that we could not fix.</p> \
+  const status = new LoadingStatus(feedbackTarget, spinnerOptions)
+  try {
+    const identifier = await loadFile(file, status)
+    status.finish(loadedString)
+    return identifier
+  }
+  catch (error: unknown) {
+    status.finish(errorString)
+    const details = $("<div>")
+      .text(error instanceof Error ? error.message : String(error))
+      .html()
+    dialog.alert({
+      title: "Import failed",
+      message:
+        `<p>Your file contains errors that we could not fix.</p> \
 <p>Details:</br> \
-<small>${error instanceof Error ? error.message : String(error)}</small> \
+<small>${details}</small> \
 </p>`,
-      })
-      feedbackTarget.innerHTML = errorString
-      log.error(error)
-      return undefined
     })
-}
-
-const loadFile = function (feedbackTarget: HTMLElement, file: File, spinnerOptions: SpinnerOptions): Promise<ProgressEvent<FileReader>> {
-  feedbackTarget.innerHTML = readingString
-  Spinner.start(feedbackTarget, spinnerOptions)
-  const reader = new FileReader()
-  return new Promise((resolve, reject) => {
-    reader.onload = resolve
-    reader.onerror = reject
-    reader.onabort = reject
-    return setTimeout(() => { reader.readAsArrayBuffer(file) })
-  })
-}
-
-// Detect if an STL file is binary or ASCII
-// Binary STL: 80 byte header + 4 byte face count + (50 bytes * face count)
-// ASCII STL: starts with "solid" and contains proper ASCII keywords
-//
-// This is needed because stl-parser's built-in detection is flawed - it converts
-// the entire file to a string and checks for "solid", "facet", and "vertex" keywords.
-// Binary STL files often have "solid" in their 80-byte header and can accidentally
-// contain byte sequences matching "facet"/"vertex", causing misdetection.
-// Our approach uses the file size formula which is more reliable for binary detection.
-function detectStlType (arrayBuffer: ArrayBuffer): "ascii" | "binary" {
-  const dataView = new DataView(arrayBuffer)
-
-  // If file is too small to be a valid binary STL, assume ASCII
-  if (arrayBuffer.byteLength < 84) {
-    return "ascii"
+    log.error(error)
+    return undefined
   }
-
-  // Read face count from bytes 80-83 (little-endian uint32)
-  const faceCount = dataView.getUint32(80, true)
-
-  // Calculate expected binary file size: 84 header bytes + 50 bytes per face
-  const expectedBinarySize = 84 + faceCount * 50
-
-  // If file size matches expected binary size (within tolerance for padding),
-  // it's likely binary
-  if (Math.abs(arrayBuffer.byteLength - expectedBinarySize) <= 1) {
-    return "binary"
-  }
-
-  // Check if it looks like ASCII by checking for printable characters
-  // in the first part of the file (after "solid" keyword)
-  const bytes = new Uint8Array(arrayBuffer)
-  let asciiCount = 0
-  const checkLength = Math.min(1000, bytes.length)
-  for (let i = 0; i < checkLength; i++) {
-    // Printable ASCII or whitespace
-    const byte = bytes[i]
-    if ((byte >= 32 && byte <= 126) || byte === 9 || byte === 10 || byte === 13) {
-      asciiCount++
-    }
-  }
-
-  // If more than 95% of checked bytes are ASCII printable, likely ASCII format
-  if (asciiCount / checkLength > 0.95) {
-    return "ascii"
-  }
-
-  return "binary"
-}
-
-interface FileReaderLoadEvent extends ProgressEvent<FileReader> {
-  target: FileReader & { result: ArrayBuffer };
-}
-
-const handleLoadedFile = (feedbackTarget: HTMLElement, filename: string, spinnerOptions: SpinnerOptions) => function (event: FileReaderLoadEvent): Promise<string> {
-  log.debug(`File ${filename} loaded, size: ${String(event.target.result.byteLength)} bytes`)
-  const fileContent = event.target.result
-
-  return new Promise((resolve, reject) => {
-    const stlType = detectStlType(fileContent)
-    log.debug(`Detected STL type: ${stlType}`)
-
-    // Convert ArrayBuffer to Buffer for the stl-parser library.
-    // The library expects Buffer and has issues with ArrayBuffer/Uint8Array
-    // when type is explicitly set.
-    const stlBuffer = Buffer.from(fileContent)
-
-    // For binary STL, we force the type to prevent the library's flawed auto-detection
-    // which can incorrectly parse binary files as ASCII if the header contains
-    // "solid", "facet", and "vertex" byte sequences.
-    const parserOptions = stlType === "binary" ? { type: "binary" as const } : undefined
-
-    const stlParserInstance = stlParser(stlBuffer, parserOptions)
-
-    stlParserInstance.on("error", (error: Error) => { reject(error) })
-
-    // Track if we've already processed valid model data
-    // The parser may emit multiple data events (parsed model + raw buffer)
-    let modelProcessed = false
-
-    stlParserInstance.on("data", (data: { faces?: unknown[] }) => {
-      // Only process if this is a valid parsed model object with faces
-      // Skip raw buffer data or subsequent emissions
-      if (modelProcessed || !data.faces || !Array.isArray(data.faces)) {
-        return
-      }
-
-      modelProcessed = true
-      const model = meshlib.Model.fromObject({mesh: data})
-
-      model
-        .setFileName(filename)
-        .setName(filename)
-        .calculateNormals()
-        .buildFaceVertexMesh()
-        .done()
-        .then(() => {
-          Spinner.stop(feedbackTarget)
-          feedbackTarget.innerHTML = uploadString
-          Spinner.start(feedbackTarget, spinnerOptions)
-          return modelCache.store(model)
-        })
-        .then((md5hash: string) => {
-          Spinner.stop(feedbackTarget)
-          feedbackTarget.innerHTML = loadedString
-          resolve(md5hash)
-        })
-        .catch((error: unknown) => { reject(error instanceof Error ? error : new Error(String(error))) })
-    })
-
-    // Explicitly start the stream flowing (needed for some stream polyfills)
-    if (typeof stlParserInstance.resume === "function") {
-      stlParserInstance.resume()
-    }
-  })
 }

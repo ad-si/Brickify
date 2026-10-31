@@ -19,7 +19,11 @@ typecheck: node_modules
 
 .PHONY: build-workers
 build-workers: node_modules
-	npx vite build --config vite.config.workers.ts
+	rm -rf public/js/workers
+	for worker in hullVoxel volumeFill csg stlLoader; do \
+		WORKER=$$worker.worker npx vite build --config vite.config.workers.ts \
+			|| exit 1; \
+	done
 
 
 .PHONY: build

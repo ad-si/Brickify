@@ -16,14 +16,20 @@ export const exists = (identifier: string): Promise<string> => fetch(`./model/${
   })
 
 // For static builds, storing is not supported - just cache locally
+export const storeEncoded = (
+  model: MeshlibModel,
+  _base64Model: string,
+  identifier: string,
+): Promise<string> => {
+  modelCache[identifier] = Promise.resolve(model)
+  log.warn('Static build: model stored locally only, not on server')
+  return Promise.resolve(identifier)
+}
+
 export const store = (model: MeshlibModel): Promise<string> => model
   .getBase64()
-  .then((base64Model: string) => {
-    const identifier = md5(base64Model)
-    modelCache[identifier] = Promise.resolve(model)
-    log.warn('Static build: model stored locally only, not on server')
-    return identifier
-  })
+  .then((base64Model: string) =>
+    storeEncoded(model, base64Model, md5(base64Model)))
 
 // Request model data from local file
 const requestDataFromLocal = (identifier: string): Promise<string> => fetch(`./model/${identifier}`)

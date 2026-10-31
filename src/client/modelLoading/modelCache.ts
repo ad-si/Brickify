@@ -52,14 +52,22 @@ const submitDataToServer = function (identifier: string, data: string): Promise<
     .catch(send)
 }
 
+// Stores a model whose base64 representation and md5 identifier
+// were already calculated, e.g. in a worker
+export const storeEncoded = (
+  model: MeshModel,
+  base64Model: string,
+  identifier: string,
+): Promise<string> => {
+  modelCache[identifier] = Promise.resolve(model)
+  return submitDataToServer(identifier, base64Model)
+    .then(() => identifier)
+}
+
 export const store = (model: MeshModel): Promise<string> => model
   .getBase64()
-  .then((base64Model: string) => {
-    const identifier = md5(base64Model)
-    modelCache[identifier] = Promise.resolve(model)
-    return submitDataToServer(identifier, base64Model)
-      .then(() => identifier)
-  })
+  .then((base64Model: string) =>
+    storeEncoded(model, base64Model, md5(base64Model)))
 
 // requests a mesh with the given identifier from the server
 const requestDataFromServer = (identifier: string): Promise<string> => Promise.resolve($.get("/model/" + identifier))
