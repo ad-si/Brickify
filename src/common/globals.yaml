@@ -76,6 +76,10 @@ rendering:
   # shall pipeline rendering be allowed?
   usePipeline: true
 
+  # shall the canvas be transparent instead of filled with the clear color?
+  # (needs an alpha buffer, which costs performance)
+  transparentBackground: false
+
 controls:
   dolly:
     minDistance: 2

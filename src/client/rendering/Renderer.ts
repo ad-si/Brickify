@@ -42,6 +42,9 @@ interface GlobalConfig {
   fov: number;
   axisLength: number;
   controls: Record<string, unknown>;
+  rendering: {
+    transparentBackground: boolean;
+  };
 }
 
 // Interface for pointer controls from three-pointer-controls library
@@ -511,7 +514,7 @@ export default class Renderer {
 
   _setupRenderer (globalConfig: GlobalConfig): void {
     this.threeRenderer = new THREE.WebGLRenderer({
-      alpha: false,
+      alpha: globalConfig.rendering.transparentBackground,
       antialias: true,
       stencil: true,
       preserveDrawingBuffer: true,

@@ -27,6 +27,7 @@ globalConfig.colors.modelOpacity = globalConfig.colors.modelOpacityLandingPage
 // disable wireframe and pipeline on landingpage
 globalConfig.rendering.showShadowAndWireframe = false
 globalConfig.rendering.usePipeline = false
+globalConfig.rendering.transparentBackground = true
 
 // clone global config 2 times
 const config1 = clone(globalConfig)

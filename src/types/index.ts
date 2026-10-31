@@ -49,6 +49,7 @@ export interface RenderingConfig {
   showShadowAndWireframe: boolean;
   showModel: boolean;
   usePipeline: boolean;
+  transparentBackground: boolean;
 }
 
 export interface ControlsConfig {
