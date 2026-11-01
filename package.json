@@ -1,6 +1,6 @@
 {
   "name": "brickify",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Faster 3D-printing with LEGO bricks",
   "type": "module",
   "private": true,
