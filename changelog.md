@@ -3,6 +3,41 @@
 All notable changes to Brickify will be documented in this file.
 
 
+## 2026-11-01 - [0.13.0]
+
+### Added
+
+- Added clickable test strip wizard for printer calibration
+- Added loading spinner while switching LEGO assembly layers
+- Added drag-and-drop hint to landing page
+- Added Nix Flake for managing system dependencies
+
+
+### Changed
+
+- Render 3D model as see-through transparent with edges shining through
+- Run CSG computation in a Web Worker
+- Parse STL files in a Web Worker
+- Skip rendering frames when nothing changed
+- Disabled alpha buffer on WebGL canvas for better performance
+- Allow plate merges across two rows to skip invalid 1x5 size
+- Replaced Bootstrap modal and bootbox with native `<dialog>` element
+- Stopped tracking built worker bundles in git
+- Upgraded dependencies and meshlib to 0.8.1
+- Improved type safety across codebase
+
+
+### Fixed
+
+- Fixed LEGO instructions download
+- Fixed server startup
+- Fixed text-encoding polyfill crash in browser bundle
+- Fixed crashes on sparse voxel grids
+- Fixed crash on undefined hotkey events from plugins
+- Fixed crash on brush highlighting
+- Restored transparent background of landing page previews
+
+
 ## 2026-01-22 - [0.12.0]
 
 ### Changed
